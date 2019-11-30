@@ -1,4 +1,4 @@
-set(mc_zmp_area
+set(mc_zmp_area_src
   mc_zmp_area.cpp
 )
 
