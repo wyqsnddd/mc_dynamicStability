@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(mc_comStability_meters)
+project(mc_dynamicStability)
 
 set(PROJECT_URL https://gite.lirmm.fr/jrl-collaborators/mc_zmp_area)
-set(PROJECT_NAME mc_comStability_meters)
+set(PROJECT_NAME mc_dynamicStability)
 set(PROJECT_DESCRIPTION "Calculate the multi-contact ZMP area.")
 
 
