@@ -1,20 +1,21 @@
 set(mc_zmp_area_src
+  contact.cpp
   mc_zmp_area.cpp
 )
 
-add_library(mc_zmp_area SHARED ${mc_zmp_area_src})
+add_library(${PROJECT_NAME} SHARED ${mc_zmp_area_src})
 
-target_link_libraries(mc_zmp_area mc_rtc::mc_control)
-target_link_libraries(mc_zmp_area eigen-lssol::eigen-lssol)
+target_link_libraries(${PROJECT_NAME} mc_rtc::mc_control)
+target_link_libraries(${PROJECT_NAME} eigen-lssol::eigen-lssol)
 
-pkg_config_use_dependency(mc_zmp_area nlopt)
+pkg_config_use_dependency(${PROJECT_NAME} nlopt)
 
 install(
     DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-    DESTINATION include/mc_zmp_area
+    DESTINATION include/${PROJECT_NAME}
     FILES_MATCHING PATTERN "*.h*")
 
-install(TARGETS mc_zmp_area
+install(TARGETS ${PROJECT_NAME} 
   EXPORT "${TARGETS_EXPORT_NAME}"
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib

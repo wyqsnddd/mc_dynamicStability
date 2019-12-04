@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
-project(mc_zmp_area)
+
+project(mc_comStability_meters)
+
 set(PROJECT_URL https://gite.lirmm.fr/jrl-collaborators/mc_zmp_area)
-set(PROJECT_NAME mc_zmp_area)
+set(PROJECT_NAME mc_comStability_meters)
 set(PROJECT_DESCRIPTION "Calculate the multi-contact ZMP area.")
 
 
@@ -13,7 +15,7 @@ set(CMAKE_CXX_STANDARD 11)
 setup_project()
 
 find_package(mc_rtc REQUIRED)
-
+add_required_dependency(nlopt)
 
 include_directories(include)
 add_subdirectory(src)
