@@ -2,6 +2,7 @@
 
 #include <mc_rbdyn/Robots.h>
 
+#include "contact.h"
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <eigen-lssol/LSSOL_QP.h>
@@ -9,16 +10,13 @@
 #include <iostream>
 #include <math.h>
 
-# include "contact.h"
-
 namespace mc_impact
 {
 
+struct McZMPAreaParams
+{
 
-struct McZMPAreaParams{
-
-double x;
-
+  double x;
 };
 
 template<typename Point>
@@ -32,12 +30,11 @@ class McZMPArea
 {
 
 public:
-
   McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAreaParams params);
   ~McZMPArea() {}
 
-  /*! It needs to be updated in each iteration. 
-   * \param  zmpVerticies saves the updated verticies of the ZMP 
+  /*! It needs to be updated in each iteration.
+   * \param  zmpVerticies saves the updated verticies of the ZMP
    * \param  height of the surface where the ZMP is projected. The default value is 0.0.
    */
   void computeMcZMPArea(std::vector<Point> & zmpVerticies, double height = 0.8);
@@ -49,20 +46,18 @@ public:
     return robot_;
   }
 
+  McContactSet contacts; ///< The set of contacts.
 
-  McContactSet contacts; ///< The set of contacts. 
-
-  private:
+private:
   const mc_rbdyn::Robot & robot_;
 
   McZMPAreaParams params_;
-
 
   void update_();
 
   Eigen::Matrix3d crossMatrix_(const Eigen::Vector3d & input);
 
-  //std::map<std::string, std::McContact> contacts_;
+  // std::map<std::string, std::McContact> contacts_;
 };
- 
+
 } // namespace mc_impact

@@ -1,12 +1,12 @@
-# include "contact.h"
+#include "contact.h"
 
-namespace mc_impact{
+namespace mc_impact
+{
 
-McContact::McContact(const ContactParams & inputParams): contactParams_(inputParams)
+McContact::McContact(const ContactParams & inputParams) : contactParams_(inputParams)
 {
 
   updateCWC();
-
 }
 
 void McContact::updateCWC()
@@ -25,10 +25,7 @@ void McContact::updateCWC()
       -(X + Y) * mu, -mu, +mu, -1, +Y, -X, -(X + Y) * mu, -mu, -mu, -1, +Y, +X, -(X + Y) * mu, +mu, +mu, +1, +Y, +X,
       -(X + Y) * mu, +mu, -mu, +1, +Y, -X, -(X + Y) * mu, -mu, +mu, +1, -Y, +X, -(X + Y) * mu, -mu, -mu, +1, -Y, -X,
       -(X + Y) * mu;
-
-
 }
-
 
 const McContact & McContactSet::getContact(const std::string & name)
 {
@@ -49,19 +46,15 @@ bool McContactSet::addContact(const ContactParams & inputParams)
 
   if(opt != (contacts_.end()))
   {
-    std::cout << "Endeffector " << inputParams.surfaceName<< " already exists." << std::endl;
+    std::cout << "Endeffector " << inputParams.surfaceName << " already exists." << std::endl;
     return false;
   }
 
-  contacts_.insert({"test",  {inputParams}});
+  contacts_.insert({"test", {inputParams}});
 
-  std::cout << "McContactSet: Adding end-effector contact: " << inputParams.surfaceName<< std::endl;
+  std::cout << "McContactSet: Adding end-effector contact: " << inputParams.surfaceName << std::endl;
 
   return true;
 }
 
-
-
-
-
-}
+} // namespace mc_impact
