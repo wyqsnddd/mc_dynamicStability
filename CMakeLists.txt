@@ -15,6 +15,8 @@ set(CMAKE_CXX_STANDARD 11)
 setup_project()
 
 find_package(mc_rtc REQUIRED)
+find_package(Stabiliplus REQUIRED)
+
 add_required_dependency(nlopt)
 
 include_directories(include)

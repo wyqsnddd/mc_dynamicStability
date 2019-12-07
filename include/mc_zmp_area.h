@@ -10,6 +10,9 @@
 #include <iostream>
 #include <math.h>
 
+#include <polytope/staticStabilityPolytope.h>
+#include "mc_polytopeDescriptor.h"
+
 namespace mc_impact
 {
 
@@ -52,6 +55,10 @@ private:
   const mc_rbdyn::Robot & robot_;
 
   McZMPAreaParams params_;
+
+  std::shared_ptr<McPolytopeDescriptor> pdPtr_; ///< The interface object for the stabiliPlus librarry
+  
+  std::shared_ptr<StaticStabilityPolytope> polytopeProjectorPtr_;
 
   void update_();
 

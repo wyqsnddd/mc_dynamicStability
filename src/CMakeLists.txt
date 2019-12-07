@@ -7,6 +7,7 @@ add_library(${PROJECT_NAME} SHARED ${mc_zmp_area_src})
 
 target_link_libraries(${PROJECT_NAME} mc_rtc::mc_control)
 target_link_libraries(${PROJECT_NAME} eigen-lssol::eigen-lssol)
+target_link_libraries(${PROJECT_NAME} Stabiliplus::StabilityPolytope)
 
 pkg_config_use_dependency(${PROJECT_NAME} nlopt)
 

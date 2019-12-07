@@ -7,6 +7,8 @@ template<typename Point>
 McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAreaParams params)
 : robot_(robot), params_(params)
 {
+  pdPtr_ = std::make_shared<McPolytopeDescriptor>();
+  polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, 50, 0.01, GLPK);
 
   std::cout << "McZMPArea is created." << std::endl;
 }
@@ -28,12 +30,15 @@ void McZMPArea<Point>::computeMcZMPArea(std::vector<Point> & zmpVerticies, doubl
   G.setZero();
 
   // Polytope:
-  Eigen::MatrixXd F; ///< Inequality constraint of the Halfspace representation of the polytope
-  Eigen::VectorXd b;
+  //Eigen::MatrixXd F; ///< Inequality constraint of the Halfspace representation of the polytope
+  //Eigen::VectorXd b;
+
+  Eigen::MatrixXd F = pdPtr_->getA();
 
   F.resize(numContact * rowCWC, numContact * colCWC);
   F.setZero();
 
+  Eigen::VectorXd b = pdPtr_->getB();
   b.resize(numContact * colCWC);
   b.setZero();
 
@@ -63,13 +68,21 @@ void McZMPArea<Point>::computeMcZMPArea(std::vector<Point> & zmpVerticies, doubl
     count++;
   }
 
-  Eigen::MatrixXd
-      C; ///< Equality constraint that specifies the assumptions: (1) z acceleration = 0.0 (2) zero angular momentum.
-  Eigen::Vector4d d;
-  d.setZero();
+  //Eigen::MatrixXd C; ///< Equality constraint that specifies the assumptions: (1) z acceleration = 0.0 (2) zero angular momentum.
+  // Eigen::Vector4d d;
+
+  pdPtr_->getF().resize(6, 6);
+  pdPtr_->getF().setZero();
+  pdPtr_->getf().resize(6);
+  pdPtr_->getf().setZero();
+
+  Eigen::MatrixXd C = pdPtr_->getF().block<4,6>(0, 0);
+  //C.resize(4, 6);
+  //d.setZero();
+  Eigen::Vector4d d = pdPtr_->getf().segment<4>(0);
+
   d.segment<3>(0) = getRobot().com();
 
-  C.resize(4, 6);
   Eigen::Matrix3d crossUz = crossMatrix_(Eigen::Vector3d::UnitZ());
 
   Eigen::MatrixXd B;
@@ -83,11 +96,21 @@ void McZMPArea<Point>::computeMcZMPArea(std::vector<Point> & zmpVerticies, doubl
   C = 1.0 / (mass * 9.81) * (B * G);
 
   // Projection
-  Eigen::MatrixXd E; ///< The equality constraints that specify the projection: polytope -> polygon (on the surface).
-  Eigen::Vector2d f;
+  //Eigen::MatrixXd E; ///< The equality constraints that specify the projection: polytope -> polygon (on the surface).
+  //Eigen::Vector2d f;
+
+  Eigen::MatrixXd E = pdPtr_->getF().block<2,6>(4,0);
+  Eigen::Vector2d f = pdPtr_->getf().segment<2>(4);
 
   E = (height - getRobot().com().z()) / (mass * 9.81) * G.block<2, 6>(0, 0);
   f << getRobot().com().x(), getRobot().com().y();
+
+
+  polytopeProjectorPtr_->initSolver();
+
+  polytopeProjectorPtr_->projectionStabilityPolyhedron();
+
+
 }
 
 template<typename Point>
@@ -107,6 +130,7 @@ Eigen::Matrix3d McZMPArea<Point>::crossMatrix_(const Eigen::Vector3d & input)
 
   return skewSymmetricMatrix;
 }
+
 // The explicit instantiation
 template struct mc_impact::McZMPArea<Eigen::Vector3d>;
 template struct mc_impact::McZMPArea<Eigen::Vector2d>;
