@@ -1,4 +1,5 @@
 #include "mc_zmp_area.h"
+# include "utils.h"
 
 namespace mc_impact
 {
@@ -110,6 +111,12 @@ void McZMPArea<Point>::computeMcZMPArea(std::vector<Point> & zmpVerticies, doubl
 
   polytopeProjectorPtr_->projectionStabilityPolyhedron();
 
+
+  Eigen::MatrixXd G_zmp;
+  Eigen::VectorXd h_zmp;
+  double lowerSlope = 0.01;
+  double upperSlope = 1000.0;
+  //pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), G_zmp, h_zmp, lowerSlope, upperSlope);
 
 }
 

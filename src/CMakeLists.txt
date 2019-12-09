@@ -1,6 +1,7 @@
 set(mc_zmp_area_src
   contact.cpp
   mc_zmp_area.cpp
+  utils.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${mc_zmp_area_src})
@@ -8,6 +9,8 @@ add_library(${PROJECT_NAME} SHARED ${mc_zmp_area_src})
 target_link_libraries(${PROJECT_NAME} mc_rtc::mc_control)
 target_link_libraries(${PROJECT_NAME} eigen-lssol::eigen-lssol)
 target_link_libraries(${PROJECT_NAME} Stabiliplus::StabilityPolytope)
+target_link_libraries(${PROJECT_NAME} Stabiliplus::ProblemDescriptor)
+target_link_libraries(${PROJECT_NAME} Stabiliplus::wrappers)
 
 pkg_config_use_dependency(${PROJECT_NAME} nlopt)
 
