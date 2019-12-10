@@ -5,7 +5,7 @@ namespace mc_impact
 {
 
 template<typename Point>
-McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAreaParams params)
+McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAreaParams & params)
 : robot_(robot), params_(params)
 {
   pdPtr_ = std::make_shared<McPolytopeDescriptor>();
@@ -139,7 +139,7 @@ Eigen::Matrix3d McZMPArea<Point>::crossMatrix_(const Eigen::Vector3d & input)
 }
 
 // The explicit instantiation
-template struct mc_impact::McZMPArea<Eigen::Vector3d>;
-template struct mc_impact::McZMPArea<Eigen::Vector2d>;
+template class mc_impact::McZMPArea<Eigen::Vector3d>;
+template class mc_impact::McZMPArea<Eigen::Vector2d>;
 
 } // namespace mc_impact
