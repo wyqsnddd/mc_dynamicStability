@@ -1,8 +1,6 @@
 #pragma once
 
 #include <mc_rbdyn/Robots.h>
-
-#include "contact.h"
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <eigen-lssol/LSSOL_QP.h>
@@ -11,11 +9,11 @@
 #include <math.h>
 
 #include <polytope/staticStabilityPolytope.h>
-#include "mc_polytopeDescriptor.h"
 
-namespace mc_impact
-{
+#include "mc_dynamicStability/mc_polytopeDescriptor.h"
+#include "mc_dynamicStability/contact.h"
 
+namespace mc_impact { 
 struct McZMPAreaParams
 {
 
@@ -40,7 +38,7 @@ public:
    * \param  zmpVerticies saves the updated verticies of the ZMP
    * \param  height of the surface where the ZMP is projected. The default value is 0.0.
    */
-  void computeMcZMPArea(std::vector<Point> & zmpVerticies, double height = 0.8);
+  void computeMcZMPArea(double height = 0.8);
 
   /*! Obtain a reference to the robot.
    */

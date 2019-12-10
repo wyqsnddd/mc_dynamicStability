@@ -1,4 +1,5 @@
-# include "utils.h"
+# include "mc_dynamicStability/utils.h"
+
 # include <polytope/staticPoint.h> 
 
 template<typename T>

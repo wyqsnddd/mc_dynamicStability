@@ -1,5 +1,5 @@
-#include "mc_zmp_area.h"
-# include "utils.h"
+#include "mc_dynamicStability/mc_zmp_area.h"
+#include "mc_dynamicStability/utils.h"
 
 namespace mc_impact
 {
@@ -15,7 +15,7 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAre
 }
 
 template<typename Point>
-void McZMPArea<Point>::computeMcZMPArea(std::vector<Point> & zmpVerticies, double height)
+void McZMPArea<Point>::computeMcZMPArea(double height)
 {
 
   assert(contacts.getContactMap().size() > 0);
@@ -116,7 +116,7 @@ void McZMPArea<Point>::computeMcZMPArea(std::vector<Point> & zmpVerticies, doubl
   Eigen::VectorXd h_zmp;
   double lowerSlope = 0.01;
   double upperSlope = 1000.0;
-  //pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), G_zmp, h_zmp, lowerSlope, upperSlope);
+  pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), G_zmp, h_zmp, lowerSlope, upperSlope);
 
 }
 

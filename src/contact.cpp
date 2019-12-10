@@ -1,4 +1,4 @@
-#include "contact.h"
+#include "mc_dynamicStability/contact.h"
 
 namespace mc_impact
 {
