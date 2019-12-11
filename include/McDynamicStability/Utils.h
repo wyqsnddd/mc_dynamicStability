@@ -1,10 +1,8 @@
-# pragma once
-
-#include <iostream>
-#include <memory>
+#pragma once
 
 #include <Eigen/Dense>
 #include <iostream>
+#include <memory>
 
 namespace mc_impact
 {
@@ -28,7 +26,6 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               Eigen::VectorXd & h,
                               double miniSlope = 0.01,
                               double maxSlope = 1000.0);
-
 
 template<typename Point>
 void pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point>> & inputPoints,

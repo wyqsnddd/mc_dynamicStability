@@ -1,6 +1,6 @@
-# include "mc_dynamicStability/utils.h"
+#include "mc_dynamicStability/utils.h"
 
-# include <polytope/staticPoint.h> 
+#include <polytope/staticPoint.h>
 
 template<typename T>
 T sgn(T val)
@@ -42,14 +42,12 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
   G.setOnes();
   h.setOnes();
 
-  
-
   for(auto & p : inputPoints)
   {
     center.x() += p.x();
     center.y() += p.y();
   }
-  
+
   center.x() = center.x() / (double)vertexNumber;
   center.y() = center.y() / (double)vertexNumber;
 
@@ -75,7 +73,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
     }
 
     Eigen::Vector2d difference = point_two - point_one;
-    //difference.normalize();
+    // difference.normalize();
     double slope = difference.y() / difference.x();
 
     clampSlope(slope, miniSlope, maxSlope);
@@ -110,21 +108,17 @@ template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(const std::ve
                                                                    double maxSlope);
 
 template void mc_impact::pointsToInequalityMatrix<StaticPoint>(const std::vector<StaticPoint> & inputPoints,
-                                                                   Eigen::MatrixXd & G,
-                                                                   Eigen::VectorXd & h,
-                                                                   double miniSlope,
-                                                                   double maxSlope);
-								   
-
-
-
+                                                               Eigen::MatrixXd & G,
+                                                               Eigen::VectorXd & h,
+                                                               double miniSlope,
+                                                               double maxSlope);
 
 template<typename Point>
 void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point>> & inputPoints,
-                              Eigen::MatrixXd & G,
-                              Eigen::VectorXd & h,
-                              double miniSlope,
-                              double maxSlope)
+                                         Eigen::MatrixXd & G,
+                                         Eigen::VectorXd & h,
+                                         double miniSlope,
+                                         double maxSlope)
 {
   int vertexNumber = static_cast<int>(inputPoints.size());
   int dim = static_cast<int>(inputPoints[0]->size());
@@ -149,7 +143,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
   int vNumber = 0;
 
   for(auto idx = inputPoints.begin(); idx != inputPoints.end(); idx++, vNumber++)
-  //for(auto & idx: inputPoints)
+  // for(auto & idx: inputPoints)
   {
     Eigen::Vector2d point_one;
     point_one.x() = (*idx)->x();
@@ -169,7 +163,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
     }
 
     Eigen::Vector2d difference = point_two - point_one;
-    //difference.normalize();
+    // difference.normalize();
     double slope = difference.y() / difference.x();
 
     clampSlope(slope, miniSlope, maxSlope);
@@ -191,25 +185,23 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
   vNumber++;
 } // end of pointsToInequalityMatrix
 
+template void mc_impact::pointsToInequalityMatrix<Eigen::Vector2d>(
+    const std::vector<std::shared_ptr<Eigen::Vector2d>> & inputPoints,
+    Eigen::MatrixXd & G,
+    Eigen::VectorXd & h,
+    double miniSlope,
+    double maxSlope);
 
-template void mc_impact::pointsToInequalityMatrix<Eigen::Vector2d>(const std::vector<std::shared_ptr<Eigen::Vector2d>> & inputPoints,
-                                                                   Eigen::MatrixXd & G,
-                                                                   Eigen::VectorXd & h,
-                                                                   double miniSlope,
-                                                                   double maxSlope);
+template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(
+    const std::vector<std::shared_ptr<Eigen::Vector3d>> & inputPoints,
+    Eigen::MatrixXd & G,
+    Eigen::VectorXd & h,
+    double miniSlope,
+    double maxSlope);
 
-
-								   
-template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(const std::vector<std::shared_ptr<Eigen::Vector3d>> & inputPoints,
-                                                                   Eigen::MatrixXd & G,
-                                                                   Eigen::VectorXd & h,
-                                                                   double miniSlope,
-                                                                   double maxSlope);
-
-template void mc_impact::pointsToInequalityMatrix<StaticPoint>(const std::vector<std::shared_ptr<StaticPoint>> & inputPoints,
-                                                                   Eigen::MatrixXd & G,
-                                                                   Eigen::VectorXd & h,
-                                                                   double miniSlope,
-                                                                   double maxSlope);
-	
-
+template void mc_impact::pointsToInequalityMatrix<StaticPoint>(
+    const std::vector<std::shared_ptr<StaticPoint>> & inputPoints,
+    Eigen::MatrixXd & G,
+    Eigen::VectorXd & h,
+    double miniSlope,
+    double maxSlope);

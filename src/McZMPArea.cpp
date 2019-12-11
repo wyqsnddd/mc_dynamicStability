@@ -31,8 +31,8 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   G.setZero();
 
   // Polytope:
-  //Eigen::MatrixXd F; ///< Inequality constraint of the Halfspace representation of the polytope
-  //Eigen::VectorXd b;
+  // Eigen::MatrixXd F; ///< Inequality constraint of the Halfspace representation of the polytope
+  // Eigen::VectorXd b;
 
   Eigen::MatrixXd F = pdPtr_->getA();
 
@@ -69,7 +69,8 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
     count++;
   }
 
-  //Eigen::MatrixXd C; ///< Equality constraint that specifies the assumptions: (1) z acceleration = 0.0 (2) zero angular momentum.
+  // Eigen::MatrixXd C; ///< Equality constraint that specifies the assumptions: (1) z acceleration = 0.0 (2) zero
+  // angular momentum.
   // Eigen::Vector4d d;
 
   pdPtr_->getF().resize(6, 6);
@@ -77,9 +78,9 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   pdPtr_->getf().resize(6);
   pdPtr_->getf().setZero();
 
-  Eigen::MatrixXd C = pdPtr_->getF().block<4,6>(0, 0);
-  //C.resize(4, 6);
-  //d.setZero();
+  Eigen::MatrixXd C = pdPtr_->getF().block<4, 6>(0, 0);
+  // C.resize(4, 6);
+  // d.setZero();
   Eigen::Vector4d d = pdPtr_->getf().segment<4>(0);
 
   d.segment<3>(0) = getRobot().com();
@@ -97,28 +98,27 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   C = 1.0 / (mass * 9.81) * (B * G);
 
   // Projection
-  //Eigen::MatrixXd E; ///< The equality constraints that specify the projection: polytope -> polygon (on the surface).
-  //Eigen::Vector2d f;
+  // Eigen::MatrixXd E; ///< The equality constraints that specify the projection: polytope -> polygon (on the surface).
+  // Eigen::Vector2d f;
 
-  Eigen::MatrixXd E = pdPtr_->getF().block<2,6>(4,0);
+  Eigen::MatrixXd E = pdPtr_->getF().block<2, 6>(4, 0);
   Eigen::Vector2d f = pdPtr_->getf().segment<2>(4);
 
   E = (height - getRobot().com().z()) / (mass * 9.81) * G.block<2, 6>(0, 0);
   f << getRobot().com().x(), getRobot().com().y();
-
 
   polytopeProjectorPtr_->initSolver();
 
   polytopeProjectorPtr_->projectionStabilityPolyhedron();
 
   numVertex_ = static_cast<int>(polytopeProjectorPtr_->getPolygonVerticies().size());
-  //numVertex_ = static_cast<int>(polytopeProjectorPtr_->constraintPlanes().size());
+  // numVertex_ = static_cast<int>(polytopeProjectorPtr_->constraintPlanes().size());
 
-  //double lowerSlope = 0.01;
-  //double upperSlope = 1000.0;
+  // double lowerSlope = 0.01;
+  // double upperSlope = 1000.0;
 
-  pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, params_.lowerSlope, params_.upperSlope);
-
+  pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), ieqConstraintBlocks_.G_zmp,
+                                        ieqConstraintBlocks_.h_zmp, params_.lowerSlope, params_.upperSlope);
 }
 
 template<typename Point>

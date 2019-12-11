@@ -11,7 +11,7 @@ class McPolytopeDescriptor : public ProblemDescriptor
  */
 {
 public:
-  McPolytopeDescriptor():ProblemDescriptor() {}
+  McPolytopeDescriptor() : ProblemDescriptor() {}
   ~McPolytopeDescriptor() {}
 
   // ----------- main class methods ----------
@@ -39,4 +39,4 @@ public:
     return m_f;
   }
 };
-}
+} // namespace mc_impact

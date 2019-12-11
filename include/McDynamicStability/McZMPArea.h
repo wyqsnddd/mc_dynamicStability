@@ -1,31 +1,30 @@
 #pragma once
 
 #include <mc_rbdyn/Robots.h>
+
+#include "McDynamicStability/McContact.h"
+#include "McDynamicStability/McPolytopeDescriptor.h"
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <eigen-lssol/LSSOL_QP.h>
 #include <iomanip>
 #include <iostream>
 #include <math.h>
-
 #include <polytope/staticStabilityPolytope.h>
 
-#include "McDynamicStability/McPolytopeDescriptor.h"
-#include "McDynamicStability/McContact.h"
-
-namespace mc_impact { 
+namespace mc_impact
+{
 struct McZMPAreaParams
 {
   double lowerSlope = 0.01;
   double upperSlope = 1000.0;
 };
 
-struct IeqConstraintBlocks 
+struct IeqConstraintBlocks
 {
   Eigen::MatrixXd G_zmp;
   Eigen::VectorXd h_zmp;
 };
-
 
 template<typename Point>
 class McZMPArea
@@ -58,25 +57,26 @@ public:
 
   inline const IeqConstraintBlocks & getIeqConstraint()
   {
-     return ieqConstraintBlocks_; 
+    return ieqConstraintBlocks_;
   }
 
   inline int getNumVertex() const
   {
-    return numVertex_; 
+    return numVertex_;
   }
 
   inline int getMaxNumVertex() const
   {
-    return polytopeProjectorPtr_->getMaxIteration(); 
+    return polytopeProjectorPtr_->getMaxIteration();
   }
+
 private:
   const mc_rbdyn::Robot & robot_;
 
   McZMPAreaParams params_;
 
   std::shared_ptr<McPolytopeDescriptor> pdPtr_; ///< The interface object for the stabiliPlus librarry
-  
+
   int numVertex_ = 0;
 
   std::shared_ptr<StaticStabilityPolytope> polytopeProjectorPtr_;
@@ -88,7 +88,6 @@ private:
   IeqConstraintBlocks ieqConstraintBlocks_;
 
   // std::map<std::string, std::McContact> contacts_;
-  
 };
 
 } // namespace mc_impact
