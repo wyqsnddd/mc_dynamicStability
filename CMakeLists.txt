@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(mc_dynamicStability)
+project(mc_dynamicStability VERSION 0.0.0)
 
 set(PROJECT_URL https://gite.lirmm.fr/jrl-collaborators/mc_zmp_area)
 set(PROJECT_NAME mc_dynamicStability)

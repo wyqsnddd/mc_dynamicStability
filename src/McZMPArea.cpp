@@ -111,12 +111,13 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
 
   polytopeProjectorPtr_->projectionStabilityPolyhedron();
 
+  numVertex_ = static_cast<int>(polytopeProjectorPtr_->getPolygonVerticies().size());
+  //numVertex_ = static_cast<int>(polytopeProjectorPtr_->constraintPlanes().size());
 
-  Eigen::MatrixXd G_zmp;
-  Eigen::VectorXd h_zmp;
-  double lowerSlope = 0.01;
-  double upperSlope = 1000.0;
-  pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), G_zmp, h_zmp, lowerSlope, upperSlope);
+  //double lowerSlope = 0.01;
+  //double upperSlope = 1000.0;
+
+  pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, params_.lowerSlope, params_.upperSlope);
 
 }
 

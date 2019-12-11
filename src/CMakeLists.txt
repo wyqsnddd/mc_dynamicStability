@@ -1,7 +1,7 @@
 set(mc_zmp_area_src
-  contact.cpp
-  mc_zmp_area.cpp
-  utils.cpp
+  McContact.cpp
+  McZMPArea.cpp
+  Utils.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${mc_zmp_area_src})
@@ -14,9 +14,11 @@ target_link_libraries(${PROJECT_NAME} Stabiliplus::wrappers)
 
 pkg_config_use_dependency(${PROJECT_NAME} nlopt)
 
+include(GNUInstallDirs)
+
 install(
     DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-    DESTINATION include/${PROJECT_NAME}
+    DESTINATION include
     FILES_MATCHING PATTERN "*.h*")
 
 install(TARGETS ${PROJECT_NAME} 
