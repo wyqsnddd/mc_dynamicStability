@@ -8,11 +8,11 @@
 namespace mc_impact
 {
 
-struct ContactParams
+struct McContactParams
 {
-  std::string surfaceName; ///< surface name of the contact
-  std::string bodyName;
-  std::string sensorName;
+  std::string surfaceName; ///< surface name of the contact.
+  std::string bodyName; ///< Body name of the link where the contact is defined.
+  std::string sensorName; ///< Sensor name of the link.
 
   double halfX = 0.06;
   double halfY = 0.05;
@@ -25,13 +25,13 @@ struct ContactParams
 class McContact
 {
 public:
-  McContact(const ContactParams & inputParams);
+  McContact(const McContactParams & inputParams);
 
   ~McContact() {}
 
-  inline const ContactParams & getContactParams() const
+  inline const McContactParams & getContactParams() const
   {
-    return contactParams_;
+    return mcContactParams_;
   }
 
   inline const Eigen::MatrixXd & contactWrenchCone() const
@@ -53,7 +53,7 @@ public:
   void updateCoP(const sva::ForceVecd & inputWrench);
 
 private:
-  ContactParams contactParams_;
+  McContactParams mcContactParams_;
 
   sva::ForceVecd desiredWrench_; ///< Desired wrench in the body frame, e.g. l/r_sole ;
   Eigen::Vector2d desiredCoP_; ///< Desired CoP in the contact surface frame, e.g. LeftFoot or RightFoot.
@@ -67,7 +67,7 @@ struct McContactSet
    */
   const McContact & getContact(const std::string & name);
 
-  bool addContact(const ContactParams & inputParams);
+  bool addContact(const McContactParams & inputParams);
 
   const std::map<std::string, McContact> & getContactMap();
 

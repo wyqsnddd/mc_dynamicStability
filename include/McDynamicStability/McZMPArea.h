@@ -17,7 +17,7 @@ namespace mc_impact
 struct McZMPAreaParams
 {
   double lowerSlope = 0.01;
-  double upperSlope = 1000.0;
+  double upperSlope = 100.0;
 };
 
 struct IeqConstraintBlocks

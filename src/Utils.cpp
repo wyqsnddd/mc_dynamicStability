@@ -1,4 +1,4 @@
-#include "mc_dynamicStability/utils.h"
+#include "McDynamicStability/Utils.h"
 
 #include <polytope/staticPoint.h>
 

@@ -1,5 +1,6 @@
-#include "mc_dynamicStability/mc_zmp_area.h"
-#include "mc_dynamicStability/utils.h"
+#include "McDynamicStability/McZMPArea.h"
+
+#include "McDynamicStability/Utils.h"
 
 namespace mc_impact
 {
