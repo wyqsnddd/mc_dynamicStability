@@ -1,9 +1,9 @@
-#include "mc_dynamicStability/contact.h"
+#include "McDynamicStability/McContact.h"
 
 namespace mc_impact
 {
 
-McContact::McContact(const ContactParams & inputParams) : contactParams_(inputParams)
+McContact::McContact(const McContactParams & inputParams) : mcContactParams_(inputParams)
 {
 
   updateCWC();
@@ -17,14 +17,26 @@ void McContact::updateCWC()
 
   CWC_.resize(16, 6);
   CWC_.setZero();
+  // clang-format off
   CWC_ <<
       // mx,  my,  mz,  fx,  fy,            fz,
-      0,
-      0, 0, -1, 0, -mu, 0, 0, 0, +1, 0, -mu, 0, 0, 0, 0, -1, -mu, 0, 0, 0, 0, +1, -mu, -1, 0, 0, 0, 0, -Y, +1, 0, 0, 0,
-      0, -Y, 0, -1, 0, 0, 0, -X, 0, +1, 0, 0, 0, -X, +mu, +mu, -1, -Y, -X, -(X + Y) * mu, +mu, -mu, -1, -Y, +X,
-      -(X + Y) * mu, -mu, +mu, -1, +Y, -X, -(X + Y) * mu, -mu, -mu, -1, +Y, +X, -(X + Y) * mu, +mu, +mu, +1, +Y, +X,
-      -(X + Y) * mu, +mu, -mu, +1, +Y, -X, -(X + Y) * mu, -mu, +mu, +1, -Y, +X, -(X + Y) * mu, -mu, -mu, +1, -Y, -X,
-      -(X + Y) * mu;
+          0,   0,   0, -1,    0,           -mu, 
+	  0,   0,   0, +1,    0,           -mu, 
+	  0,   0,   0,  0,   -1,           -mu, 
+	  0,   0,   0,  0,   +1,           -mu, 
+	 -1,   0,   0,  0,    0,            -Y, 
+	 +1,   0,   0,  0,    0,            -Y, 
+	  0,  -1,   0,  0,    0,            -X, 
+	  0,  +1,   0,  0,    0,            -X, 
+	+mu, +mu,  -1, -Y,   -X, -(X + Y) * mu, 
+	+mu, -mu,  -1, -Y,   +X, -(X + Y) * mu, 
+	-mu, +mu,  -1, +Y,   -X, -(X + Y) * mu, 
+	-mu, -mu,  -1, +Y,   +X, -(X + Y) * mu, 
+	+mu, +mu,  +1, +Y,   +X, -(X + Y) * mu, 
+	+mu, -mu,  +1, +Y,   -X, -(X + Y) * mu, 
+	-mu, +mu,  +1, -Y,   +X, -(X + Y) * mu, 
+	-mu, -mu,  +1, -Y,   -X, -(X + Y) * mu;
+  // clang-format on 
 }
 
 const McContact & McContactSet::getContact(const std::string & name)
@@ -40,7 +52,7 @@ const McContact & McContactSet::getContact(const std::string & name)
   }
 }
 
-bool McContactSet::addContact(const ContactParams & inputParams)
+bool McContactSet::addContact(const McContactParams & inputParams)
 {
   auto opt = contacts_.find(inputParams.surfaceName);
 
