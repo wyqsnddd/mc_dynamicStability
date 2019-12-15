@@ -5,9 +5,19 @@
 namespace mc_impact
 {
 
+
+// Repeat static constexpr declarations
+// See also https://stackoverflow.com/q/8016780
 template<typename Point>
-McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAreaParams & params)
-: robot_(robot), params_(params)
+constexpr double McZMPArea<Point>::LOWER_SLOPE;
+
+template<typename Point>
+constexpr double McZMPArea<Point>::UPPER_SLOPE;
+
+
+template<typename Point>
+McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,  std::shared_ptr<McContactSet> contactSetPtr)
+: robot_(robot), contactsPtr_(contactSetPtr)
 {
   pdPtr_ = std::make_shared<McPolytopeDescriptor>();
   polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, 50, 0.01, GLPK);
@@ -21,9 +31,9 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
 
   assert(contacts.getContactMap().size() > 0);
 
-  int numContact = static_cast<int>(contacts.getContactMap().size());
-  int rowCWC = static_cast<int>(contacts.getContactMap().begin()->second.contactWrenchCone().rows());
-  int colCWC = static_cast<int>(contacts.getContactMap().begin()->second.contactWrenchCone().cols());
+  int numContact = static_cast<int>(getContactSet()->getContactMap().size());
+  int rowCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().rows());
+  int colCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().cols());
 
   double mass = getRobot().mass(); // The result does not depend on the mass.
 
@@ -45,7 +55,7 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   b.setZero();
 
   int count = 0;
-  for(auto & contactPair : contacts.getContactMap())
+  for(auto & contactPair : getContactSet()->getContactMap())
   {
     Eigen::Matrix6d rotationToWorld;
     rotationToWorld.setIdentity();
@@ -84,7 +94,7 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   // d.setZero();
   Eigen::Vector4d d = pdPtr_->getf().segment<4>(0);
 
-  d.segment<3>(0) = getRobot().com();
+  d.head<3>() = getRobot().com();
 
   Eigen::Matrix3d crossUz = crossMatrix_(Eigen::Vector3d::UnitZ());
 
@@ -115,11 +125,9 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   numVertex_ = static_cast<int>(polytopeProjectorPtr_->getPolygonVerticies().size());
   // numVertex_ = static_cast<int>(polytopeProjectorPtr_->constraintPlanes().size());
 
-  // double lowerSlope = 0.01;
-  // double upperSlope = 1000.0;
-
   pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), ieqConstraintBlocks_.G_zmp,
-                                        ieqConstraintBlocks_.h_zmp, params_.lowerSlope, params_.upperSlope);
+                                        ieqConstraintBlocks_.h_zmp, 
+					LOWER_SLOPE, UPPER_SLOPE);
 }
 
 template<typename Point>

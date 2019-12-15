@@ -4,6 +4,7 @@
 
 #include "McDynamicStability/McContact.h"
 #include "McDynamicStability/McPolytopeDescriptor.h"
+
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <eigen-lssol/LSSOL_QP.h>
@@ -14,11 +15,6 @@
 
 namespace mc_impact
 {
-struct McZMPAreaParams
-{
-  double lowerSlope = 0.01;
-  double upperSlope = 100.0;
-};
 
 struct IeqConstraintBlocks
 {
@@ -36,8 +32,11 @@ class McZMPArea
 
 {
 
+  static constexpr double LOWER_SLOPE = 0.01;
+  static constexpr double UPPER_SLOPE = 100.0;
+
 public:
-  McZMPArea(const mc_rbdyn::Robot & robot, const struct McZMPAreaParams & params);
+  McZMPArea(const mc_rbdyn::Robot & robot, std::shared_ptr<McContactSet> contactSetPtr);
   ~McZMPArea() {}
 
   /*! It needs to be updated in each iteration.
@@ -53,7 +52,11 @@ public:
     return robot_;
   }
 
-  McContactSet contacts; ///< The set of contacts.
+  ///< Get pointer to the set of contacts.
+  inline std::shared_ptr<McContactSet> getContactSet() 
+  {
+    return contactsPtr_; 
+  }
 
   inline const IeqConstraintBlocks & getIeqConstraint()
   {
@@ -73,14 +76,14 @@ public:
 private:
   const mc_rbdyn::Robot & robot_;
 
-  McZMPAreaParams params_;
-
   std::shared_ptr<McPolytopeDescriptor> pdPtr_; ///< The interface object for the stabiliPlus librarry
 
   int numVertex_ = 0;
 
   std::shared_ptr<StaticStabilityPolytope> polytopeProjectorPtr_;
 
+  
+  std::shared_ptr<McContactSet> contactsPtr_; 
   void update_();
 
   Eigen::Matrix3d crossMatrix_(const Eigen::Vector3d & input);

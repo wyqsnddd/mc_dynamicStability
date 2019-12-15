@@ -9,6 +9,9 @@ namespace mc_impact
 {
 
 struct McContactParams
+/*!
+ * \brief Parameters of a contact. We use the surface name to denote this contact
+ */
 {
   std::string surfaceName; ///< surface name of the contact.
   std::string bodyName; ///< Body name of the link where the contact is defined.
@@ -62,17 +65,19 @@ private:
 
 struct McContactSet
 {
-
+public:
+  McContactSet(){}
+  ~McContactSet(){}
   /*! Obtain a reference to the contact.
    */
   const McContact & getContact(const std::string & name);
 
   bool addContact(const McContactParams & inputParams);
 
-  const std::map<std::string, McContact> & getContactMap();
+  const std::map<std::string, mc_impact::McContact> & getContactMap();
 
 private:
-  std::map<std::string, McContact> contacts_;
+  std::map<std::string, mc_impact::McContact> contacts_;
 };
 
 } // namespace mc_impact

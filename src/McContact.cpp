@@ -17,6 +17,7 @@ void McContact::updateCWC()
 
   CWC_.resize(16, 6);
   CWC_.setZero();
+
   // clang-format off
   CWC_ <<
       // mx,  my,  mz,  fx,  fy,            fz,
@@ -56,15 +57,17 @@ bool McContactSet::addContact(const McContactParams & inputParams)
 {
   auto opt = contacts_.find(inputParams.surfaceName);
 
+
   if(opt != (contacts_.end()))
   {
     std::cout << "Endeffector " << inputParams.surfaceName << " already exists." << std::endl;
     return false;
   }
 
-  contacts_.insert({"test", {inputParams}});
 
-  std::cout << "McContactSet: Adding end-effector contact: " << inputParams.surfaceName << std::endl;
+  contacts_.insert({inputParams.surfaceName, {inputParams}});
+
+  //std::cout << "McContactSet: Adding end-effector contact: " << inputParams.surfaceName << std::endl;
 
   return true;
 }
