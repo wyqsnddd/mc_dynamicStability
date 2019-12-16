@@ -74,7 +74,10 @@ public:
 
   bool addContact(const McContactParams & inputParams);
 
-  const std::map<std::string, mc_impact::McContact> & getContactMap();
+  inline const std::map<std::string, mc_impact::McContact> & getContactMap() const
+  {
+    return contacts_; 
+  }
 
 private:
   std::map<std::string, mc_impact::McContact> contacts_;
