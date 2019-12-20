@@ -2,6 +2,25 @@
 
 #include <polytope/staticPoint.h>
 
+
+Eigen::Matrix3d mc_impact::crossMatrix(const Eigen::Vector3d & input)
+{
+
+  Eigen::Matrix3d skewSymmetricMatrix = Eigen::Matrix3d::Zero();
+
+  skewSymmetricMatrix(0, 1) = -input(2);
+  skewSymmetricMatrix(1, 0) = input(2);
+
+  skewSymmetricMatrix(0, 2) = input(1);
+  skewSymmetricMatrix(2, 0) = -input(1);
+
+  skewSymmetricMatrix(1, 2) = -input(0);
+  skewSymmetricMatrix(2, 1) = input(0);
+
+  return skewSymmetricMatrix;
+}
+
+
 template<typename T>
 T sgn(T val)
 {
@@ -117,6 +136,7 @@ template<typename Point>
 void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point>> & inputPoints,
                                          Eigen::MatrixXd & G,
                                          Eigen::VectorXd & h,
+					 std::vector<Eigen::Vector2d> & points,
                                          double miniSlope,
                                          double maxSlope)
 {
@@ -132,11 +152,19 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
   G.setOnes();
   h.setOnes();
 
+  std::cout<<"The vertices of the porjected polygon is: "<<std::endl;
+
   for(auto & p : inputPoints)
   {
+    points.emplace_back(p->x(), p->y());
+    std::cout<<p->x() << p->y()<<std::endl;
+    //points.push_back({p->x(), p->y()});
+
     center.x() += p->x();
     center.y() += p->y();
   }
+
+  std::cout<<"------------------------------------------ "<<std::endl;
   center.x() = center.x() / (double)vertexNumber;
   center.y() = center.y() / (double)vertexNumber;
 
@@ -189,6 +217,7 @@ template void mc_impact::pointsToInequalityMatrix<Eigen::Vector2d>(
     const std::vector<std::shared_ptr<Eigen::Vector2d>> & inputPoints,
     Eigen::MatrixXd & G,
     Eigen::VectorXd & h,
+    std::vector<Eigen::Vector2d>& points,
     double miniSlope,
     double maxSlope);
 
@@ -196,6 +225,7 @@ template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(
     const std::vector<std::shared_ptr<Eigen::Vector3d>> & inputPoints,
     Eigen::MatrixXd & G,
     Eigen::VectorXd & h,
+    std::vector<Eigen::Vector2d>& points,
     double miniSlope,
     double maxSlope);
 
@@ -203,5 +233,7 @@ template void mc_impact::pointsToInequalityMatrix<StaticPoint>(
     const std::vector<std::shared_ptr<StaticPoint>> & inputPoints,
     Eigen::MatrixXd & G,
     Eigen::VectorXd & h,
+    std::vector<Eigen::Vector2d>& points,
     double miniSlope,
     double maxSlope);
+

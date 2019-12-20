@@ -35,6 +35,13 @@ class McZMPArea
   static constexpr double LOWER_SLOPE = 0.01;
   static constexpr double UPPER_SLOPE = 100.0;
 
+  ///< Size of the Grasp Matrix. 
+  static constexpr int GM_SIZE = 6;
+
+  ///< Size of the Rotation Matrix. 
+  static constexpr int RM_SIZE = 3;
+
+
 public:
   McZMPArea(const mc_rbdyn::Robot & robot, std::shared_ptr<McContactSet> contactSetPtr);
   ~McZMPArea() {}
@@ -43,7 +50,7 @@ public:
    * \param  zmpVerticies saves the updated verticies of the ZMP
    * \param  height of the surface where the ZMP is projected. The default value is 0.0.
    */
-  void computeMcZMPArea(double height = 0.8);
+  void computeMcZMPArea(double height = 0.0);
 
   /*! Obtain a reference to the robot.
    */
@@ -72,7 +79,10 @@ public:
   {
     return polytopeProjectorPtr_->getMaxIteration();
   }
-
+  inline const std::vector<Eigen::Vector2d>& getPolygonVertices()
+  {
+    return polygonVertices_; 
+  }
 private:
   const mc_rbdyn::Robot & robot_;
 
@@ -86,9 +96,10 @@ private:
   std::shared_ptr<McContactSet> contactsPtr_; 
   void update_();
 
-  Eigen::Matrix3d crossMatrix_(const Eigen::Vector3d & input);
 
   IeqConstraintBlocks ieqConstraintBlocks_;
+
+  std::vector<Eigen::Vector2d> polygonVertices_; 
 
   // std::map<std::string, std::McContact> contacts_;
 };

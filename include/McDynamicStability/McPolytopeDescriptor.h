@@ -11,7 +11,7 @@ class McPolytopeDescriptor : public ProblemDescriptor
  */
 {
 public:
-  McPolytopeDescriptor() : ProblemDescriptor() {}
+  McPolytopeDescriptor(std::string name = "Multi-contactPolytopeDescriptor") : ProblemDescriptor(name) {}
   ~McPolytopeDescriptor() {}
 
   // ----------- main class methods ----------

@@ -5,6 +5,8 @@
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 
+# include "Utils.h"
+
 namespace mc_impact
 {
 
@@ -54,6 +56,18 @@ public:
 
   void updateCWC();
   void updateCoP(const sva::ForceVecd & inputWrench);
+
+  /* 
+   * \brief calculate the grasp matrix w.r.t. the inertial frame
+   *  In the future, we need one more argument: the name of the target frame. 
+   *  this function follows the `spatial-vector-algebra`.
+   */
+  void calcGraspMatrix(Eigen::Matrix6d &G, const mc_rbdyn::Robot & realRobot) const;
+
+  /* \brief This function follows the `GeometricRobotics`.
+   * The difference is that we assume the wrench is given as: [Torque, Force].
+   */
+  void calcGeometricGraspMatrix(Eigen::Matrix6d &G,  const mc_rbdyn::Robot & realRobot) const;
 
 private:
   McContactParams mcContactParams_;
