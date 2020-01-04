@@ -11,6 +11,7 @@ target_link_libraries(${PROJECT_NAME} eigen-lssol::eigen-lssol)
 target_link_libraries(${PROJECT_NAME} Stabiliplus::StabilityPolytope)
 target_link_libraries(${PROJECT_NAME} Stabiliplus::ProblemDescriptor)
 target_link_libraries(${PROJECT_NAME} Stabiliplus::wrappers)
+target_link_libraries(${PROJECT_NAME} qhullcpp qhullstatic_r)
 
 pkg_config_use_dependency(${PROJECT_NAME} nlopt)
 
