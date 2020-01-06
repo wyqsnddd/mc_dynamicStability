@@ -4,7 +4,6 @@
 
 #include "McDynamicStability/McContact.h"
 #include "McDynamicStability/McPolytopeDescriptor.h"
-
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <eigen-lssol/LSSOL_QP.h>
@@ -22,6 +21,12 @@ struct IeqConstraintBlocks
   Eigen::VectorXd h_zmp;
 };
 
+struct McZMPAreaParams
+{
+  unsigned iterationLimit = 50;
+  double convergeThreshold = 0.01;
+};
+
 template<typename Point>
 class McZMPArea
 /*! \brief This is an c++ implementation of the multi-contact-ZMP-area calculation
@@ -35,15 +40,16 @@ class McZMPArea
   static constexpr double LOWER_SLOPE = 0.01;
   static constexpr double UPPER_SLOPE = 100.0;
 
-  ///< Size of the Grasp Matrix. 
+  ///< Size of the Grasp Matrix.
   static constexpr int GM_SIZE = 6;
 
-  ///< Size of the Rotation Matrix. 
+  ///< Size of the Rotation Matrix.
   static constexpr int RM_SIZE = 3;
 
-
 public:
-  McZMPArea(const mc_rbdyn::Robot & robot, std::shared_ptr<McContactSet> contactSetPtr);
+  McZMPArea(const mc_rbdyn::Robot & robot,
+            std::shared_ptr<McContactSet> contactSetPtr,
+            const McZMPAreaParams & mcZMPAreaParams);
   ~McZMPArea() {}
 
   /*! It needs to be updated in each iteration.
@@ -60,9 +66,9 @@ public:
   }
 
   ///< Get pointer to the set of contacts.
-  inline std::shared_ptr<McContactSet> getContactSet() 
+  inline std::shared_ptr<McContactSet> getContactSet()
   {
-    return contactsPtr_; 
+    return contactsPtr_;
   }
 
   inline const IeqConstraintBlocks & getIeqConstraint()
@@ -79,10 +85,15 @@ public:
   {
     return polytopeProjectorPtr_->getMaxIteration();
   }
-  inline const std::vector<Eigen::Vector2d>& getPolygonVertices()
+  inline const std::vector<Eigen::Vector2d> & getPolygonVertices()
   {
-    return polygonVertices_; 
+    return polygonVertices_;
   }
+  const McZMPAreaParams & getParams() const
+  {
+    return McZMPAreaParams_;
+  }
+
 private:
   const mc_rbdyn::Robot & robot_;
 
@@ -92,14 +103,14 @@ private:
 
   std::shared_ptr<StaticStabilityPolytope> polytopeProjectorPtr_;
 
-  
-  std::shared_ptr<McContactSet> contactsPtr_; 
+  std::shared_ptr<McContactSet> contactsPtr_;
   void update_();
 
+  McZMPAreaParams McZMPAreaParams_;
 
   IeqConstraintBlocks ieqConstraintBlocks_;
 
-  std::vector<Eigen::Vector2d> polygonVertices_; 
+  std::vector<Eigen::Vector2d> polygonVertices_;
 
   // std::map<std::string, std::McContact> contacts_;
 };

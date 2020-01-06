@@ -9,19 +9,18 @@ McContact::McContact(const McContactParams & inputParams) : mcContactParams_(inp
   updateCWC();
 }
 
-void McContact::calcGeometricGraspMatrix(Eigen::Matrix6d &G, const mc_rbdyn::Robot & realRobot) const
+void McContact::calcGeometricGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Robot & realRobot) const
 {
 
   G.setIdentity();
   auto X_0_c = realRobot.surfacePose(getContactParams().surfaceName);
 
-  G.block<3,3>(0, 0) = X_0_c.rotation(); 
-  G.block<3,3>(3, 3) =  G.block<3,3>(0, 0);
-  
-  G.block<3,3>(0, 3) = crossMatrix(X_0_c.translation())*X_0_c.rotation();
+  G.block<3, 3>(0, 0) = X_0_c.rotation();
+  G.block<3, 3>(3, 3) = G.block<3, 3>(0, 0);
 
+  G.block<3, 3>(0, 3) = crossMatrix(X_0_c.translation()) * X_0_c.rotation();
 }
-void McContact::calcGraspMatrix(Eigen::Matrix6d &G, const mc_rbdyn::Robot & realRobot) const
+void McContact::calcGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Robot & realRobot) const
 {
   sva::PTransformd X_c_0 = realRobot.surfacePose(getContactParams().surfaceName).inv();
 
@@ -30,8 +29,8 @@ void McContact::calcGraspMatrix(Eigen::Matrix6d &G, const mc_rbdyn::Robot & real
 
 void McContact::updateCWC()
 {
-  double X = 2*getContactParams().halfX;
-  double Y = 2*getContactParams().halfY;
+  double X = 2 * getContactParams().halfX;
+  double Y = 2 * getContactParams().halfY;
   double mu = getContactParams().frictionCoe;
 
   CWC_.resize(16, 6);

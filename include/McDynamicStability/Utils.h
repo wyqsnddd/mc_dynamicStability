@@ -2,7 +2,11 @@
 
 #include <Eigen/Dense>
 #include <iostream>
+#include <libqhullcpp/Qhull.h>
 #include <memory>
+//#include <libqhullcpp/QhullFacetList.h>
+#include <libqhullcpp/QhullPoints.h>
+//#include <libqhullcpp/QhullVertexSet.h>
 
 namespace mc_impact
 {
@@ -27,12 +31,11 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               double miniSlope = 0.01,
                               double maxSlope = 1000.0);
 
-
 template<typename Point>
 void pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point>> & inputPoints,
                               Eigen::MatrixXd & G,
                               Eigen::VectorXd & h,
-			      std::vector<Eigen::Vector2d> & point,
+                              std::vector<Eigen::Vector2d> & point,
                               double miniSlope = 0.01,
                               double maxSlope = 1000.0);
 

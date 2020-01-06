@@ -2,7 +2,6 @@
 
 #include <polytope/staticPoint.h>
 
-
 Eigen::Matrix3d mc_impact::crossMatrix(const Eigen::Vector3d & input)
 {
 
@@ -19,7 +18,6 @@ Eigen::Matrix3d mc_impact::crossMatrix(const Eigen::Vector3d & input)
 
   return skewSymmetricMatrix;
 }
-
 
 template<typename T>
 T sgn(T val)
@@ -136,24 +134,46 @@ template<typename Point>
 void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point>> & inputPoints,
                                          Eigen::MatrixXd & G,
                                          Eigen::VectorXd & h,
-					 std::vector<Eigen::Vector2d> & points,
+                                         std::vector<Eigen::Vector2d> & pointsOut,
                                          double miniSlope,
                                          double maxSlope)
 {
-  int vertexNumber = static_cast<int>(inputPoints.size());
-  int dim = static_cast<int>(inputPoints[0]->size());
 
+  int points_size = static_cast<int>(inputPoints.size());
+  pointsOut.resize(points_size);
+
+  int dim = static_cast<int>(inputPoints[0]->size());
+  // Go through the points: update the verticies_
+  std::vector<double> points_in;
+  points_in.reserve(points_size * dim);
+
+  for(const auto & p : inputPoints)
+  {
+    points_in.push_back(p->x());
+    points_in.push_back(p->y());
+    pointsOut.emplace_back(p->x(), p->y());
+  }
+
+  // Preprocess the points: order the vertices.
+  orgQhull::Qhull qhull;
+  std::cout << "The Qhull dim is: " << dim << std::endl;
+
+  qhull.runQhull("", dim, points_size, points_in.data(), "Qt");
+
+  /*
   Eigen::Vector2d center;
   center.x() = 0;
   center.y() = 0;
+  */
 
-  G.resize(vertexNumber, dim);
-  h.resize(vertexNumber);
+  G.resize(points_size, dim);
+  h.resize(points_size);
   G.setOnes();
   h.setOnes();
 
-  std::cout<<"The vertices of the porjected polygon is: "<<std::endl;
+  std::cout << "The vertices of the porjected polygon is: " << std::endl;
 
+  /*
   for(auto & p : inputPoints)
   {
     points.emplace_back(p->x(), p->y());
@@ -163,31 +183,34 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
     center.x() += p->x();
     center.y() += p->y();
   }
+  */
 
-  std::cout<<"------------------------------------------ "<<std::endl;
-  center.x() = center.x() / (double)vertexNumber;
-  center.y() = center.y() / (double)vertexNumber;
+  std::cout << "------------------------------------------ " << std::endl;
+  // center.x() = center.x() / (double)vertexNumber;
+  // center.y() = center.y() / (double)vertexNumber;
 
+  auto tempVertexList = qhull.vertexList();
   int vNumber = 0;
+  Eigen::Vector2d center;
+  center << qhull.feasiblePoint()[0], qhull.feasiblePoint()[1]; //, qhull.feasiblePoint()[2];
 
-  for(auto idx = inputPoints.begin(); idx != inputPoints.end(); idx++, vNumber++)
-  // for(auto & idx: inputPoints)
+  // int vNumber = 0;
+  for(auto ii = tempVertexList.begin(); ii != tempVertexList.end(); ++ii, ++vNumber)
   {
-    Eigen::Vector2d point_one;
-    point_one.x() = (*idx)->x();
-    point_one.y() = (*idx)->y();
 
-    Eigen::Vector2d point_two;
+    pointsOut.emplace_back(ii->point().coordinates()[0], ii->point().coordinates()[1]);
 
-    if((idx + 1) == inputPoints.end())
+    Eigen::Vector2d point_one, point_two;
+    point_one << ii->point().coordinates()[0], ii->point().coordinates()[1];
+
+    if((ii + 1) == tempVertexList.end())
     {
-      point_two.x() = (*inputPoints.begin())->x();
-      point_two.y() = (*inputPoints.begin())->y();
+      auto jj = tempVertexList.begin();
+      point_two << jj->point().coordinates()[0], jj->point().coordinates()[1];
     }
     else
     {
-      point_two.x() = (*(idx + 1))->x();
-      point_two.y() = (*(idx + 1))->y();
+      point_two << (ii + 1)->point().coordinates()[0], (ii + 1)->point().coordinates()[1];
     }
 
     Eigen::Vector2d difference = point_two - point_one;
@@ -200,24 +223,22 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
     h(vNumber) = -slope * point_one.x() + point_one.y();
 
     int lineSign = 1;
-    /// should remove slope?
-    if(!((center.y() - slope * center.x()) <= h(vNumber)))
+    if(!(center.y() - slope * center.x() <= -slope * (h(vNumber))))
     {
       lineSign = -1;
     }
     // Correct the sign with the centeroid point
     G.block(vNumber, 0, 1, 2) *= lineSign;
     h(vNumber) *= lineSign;
+  } // iterate for each vertex
 
-  } // end of iterating over points
-  vNumber++;
 } // end of pointsToInequalityMatrix
 
 template void mc_impact::pointsToInequalityMatrix<Eigen::Vector2d>(
     const std::vector<std::shared_ptr<Eigen::Vector2d>> & inputPoints,
     Eigen::MatrixXd & G,
     Eigen::VectorXd & h,
-    std::vector<Eigen::Vector2d>& points,
+    std::vector<Eigen::Vector2d> & points,
     double miniSlope,
     double maxSlope);
 
@@ -225,7 +246,7 @@ template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(
     const std::vector<std::shared_ptr<Eigen::Vector3d>> & inputPoints,
     Eigen::MatrixXd & G,
     Eigen::VectorXd & h,
-    std::vector<Eigen::Vector2d>& points,
+    std::vector<Eigen::Vector2d> & points,
     double miniSlope,
     double maxSlope);
 
@@ -233,7 +254,6 @@ template void mc_impact::pointsToInequalityMatrix<StaticPoint>(
     const std::vector<std::shared_ptr<StaticPoint>> & inputPoints,
     Eigen::MatrixXd & G,
     Eigen::VectorXd & h,
-    std::vector<Eigen::Vector2d>& points,
+    std::vector<Eigen::Vector2d> & points,
     double miniSlope,
     double maxSlope);
-
