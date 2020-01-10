@@ -25,6 +25,7 @@ struct McZMPAreaParams
 {
   unsigned iterationLimit = 50;
   double convergeThreshold = 0.01;
+  bool useLIPMAssumptions = true;
 };
 
 template<typename Point>
@@ -105,6 +106,8 @@ private:
 
   std::shared_ptr<McContactSet> contactsPtr_;
   void update_();
+
+  void updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & inputG);
 
   McZMPAreaParams McZMPAreaParams_;
 

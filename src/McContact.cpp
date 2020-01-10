@@ -15,10 +15,26 @@ void McContact::calcGeometricGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Ro
   G.setIdentity();
   auto X_0_c = realRobot.surfacePose(getContactParams().surfaceName);
 
-  G.block<3, 3>(0, 0) = X_0_c.rotation();
+  G.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
   G.block<3, 3>(3, 3) = G.block<3, 3>(0, 0);
 
-  G.block<3, 3>(0, 3) = crossMatrix(X_0_c.translation()) * X_0_c.rotation();
+  G.block<3, 3>(3, 0) = - X_0_c.rotation().transpose() * crossMatrix(X_0_c.translation());
+  
+  //std::cout<<"Contact: "<<getContactParams().surfaceName<<", link number: "<<realRobot.bodyIndexByName(getContactParams().bodyName)<<std::endl;
+  //std::cout<<"Translation: "<< X_0_c.translation().transpose()<<std::endl;
+  //std::cout<<"Rotation: "<<std::endl<< X_0_c.rotation()<<std::endl;
+
+  //Eigen::Quaterniond q(X_0_c.rotation());
+  //std::cout<<"Quaternion: "<<q.coeffs()<<std::endl;
+
+  //Eigen::Vector3d euler = X_0_c.rotation().eulerAngles(2, 1, 0);
+
+  //std::cout<<"yaw: "<< euler(0, 0)<<", pitch: "<<euler(1,0)<<", roll: "<<euler(3,0)<<std::endl;
+
+
+  //std::cout<<"The robot com position: "<< realRobot.com().transpose()<<", mass"<<realRobot.mass()<<std::endl;
+  
+
 }
 void McContact::calcGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Robot & realRobot) const
 {
@@ -29,16 +45,19 @@ void McContact::calcGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Robot & rea
 
 void McContact::updateCWC()
 {
-  double X = 2 * getContactParams().halfX;
-  double Y = 2 * getContactParams().halfY;
-  double mu = getContactParams().frictionCoe;
+  double X =  getContactParams().halfX;
+  double Y =  getContactParams().halfY;
+
+  // Inner approximation
+  double mu = getContactParams().frictionCoe/sqrt(2.0);
 
   CWC_.resize(16, 6);
   CWC_.setZero();
 
   // clang-format off
-  CWC_ <<
+ // CWC_ <<
       // mx,  my,  mz,  fx,  fy,            fz,
+      /*
           0,   0,   0, -1,    0,           -mu, 
 	  0,   0,   0, +1,    0,           -mu, 
 	  0,   0,   0,  0,   -1,           -mu, 
@@ -55,7 +74,34 @@ void McContact::updateCWC()
 	+mu, -mu,  +1, +Y,   -X, -(X + Y) * mu, 
 	-mu, +mu,  +1, -Y,   +X, -(X + Y) * mu, 
 	-mu, -mu,  +1, -Y,   -X, -(X + Y) * mu;
+	*/
   // clang-format on 
+  
+  // clang-format off
+  CWC_ <<
+      //  fx,  fy,            fz,  mx,  my,  mz,  
+         -1,    0,           -mu,   0,   0,   0, 
+	 +1,    0,           -mu,   0,   0,   0, 
+	  0,   -1,           -mu,   0,   0,   0, 
+	  0,   +1,           -mu,   0,   0,   0, 
+	  0,    0,            -Y,  -1,   0,   0, 
+	  0,    0,            -Y,  +1,   0,   0, 
+	  0,    0,            -X,   0,  -1,   0, 
+	  0,    0,            -X,   0,  +1,   0, 
+	 -Y,   -X, -(X + Y) * mu, +mu, +mu,  -1, 
+	 -Y,   +X, -(X + Y) * mu, +mu, -mu,  -1, 
+	 +Y,   -X, -(X + Y) * mu, -mu, +mu,  -1, 
+	 +Y,   +X, -(X + Y) * mu, -mu, -mu,  -1, 
+	 +Y,   +X, -(X + Y) * mu, +mu, +mu,  +1, 
+	 +Y,   -X, -(X + Y) * mu, +mu, -mu,  +1, 
+	 -Y,   +X, -(X + Y) * mu, -mu, +mu,  +1, 
+	 -Y,   -X, -(X + Y) * mu, -mu, -mu,  +1;
+  // clang-format on 
+
+
+
+
+
 }
 
 const McContact & McContactSet::getContact(const std::string & name)

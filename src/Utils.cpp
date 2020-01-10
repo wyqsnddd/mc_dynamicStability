@@ -140,64 +140,67 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
 {
 
   int points_size = static_cast<int>(inputPoints.size());
-  pointsOut.resize(points_size);
+  std::cout<<"The input points size is: "<<points_size<<std::endl;
+  //pointsOut.resize(points_size);
 
   int dim = static_cast<int>(inputPoints[0]->size());
   // Go through the points: update the verticies_
   std::vector<double> points_in;
   points_in.reserve(points_size * dim);
 
+  Eigen::Vector2d center;
+  center.x() = 0;
+  center.y() = 0;
+
   for(const auto & p : inputPoints)
   {
     points_in.push_back(p->x());
     points_in.push_back(p->y());
-    pointsOut.emplace_back(p->x(), p->y());
+    //pointsOut.emplace_back(p->x(), p->y());
+
+    center.x() += p->x();
+    center.y() += p->y();
+
   }
+
+  center.x() = center.x() / (double)points_size;
+  center.y() = center.y() / (double)points_size;
+
+  std::cout<<"The center is: "<<center.transpose()<<std::endl;
+
 
   // Preprocess the points: order the vertices.
   orgQhull::Qhull qhull;
-  std::cout << "The Qhull dim is: " << dim << std::endl;
+  //std::cout << "The Qhull dim is: " << dim << std::endl;
 
   qhull.runQhull("", dim, points_size, points_in.data(), "Qt");
-
-  /*
-  Eigen::Vector2d center;
-  center.x() = 0;
-  center.y() = 0;
-  */
 
   G.resize(points_size, dim);
   h.resize(points_size);
   G.setOnes();
   h.setOnes();
 
-  std::cout << "The vertices of the porjected polygon is: " << std::endl;
+ // std::cout<<"The center is "<<  qhull.feasiblePoint()[0]<<", "<< qhull.feasiblePoint()[1]<<std::endl;
+  //std::cout << "The vertices of the porjected polygon is: " << std::endl;
 
-  /*
-  for(auto & p : inputPoints)
-  {
-    points.emplace_back(p->x(), p->y());
-    std::cout<<p->x() << p->y()<<std::endl;
-    //points.push_back({p->x(), p->y()});
-
-    center.x() += p->x();
-    center.y() += p->y();
-  }
-  */
-
-  std::cout << "------------------------------------------ " << std::endl;
-  // center.x() = center.x() / (double)vertexNumber;
-  // center.y() = center.y() / (double)vertexNumber;
+ 
+  //std::cout << "------------------------------------------ " << std::endl;
 
   auto tempVertexList = qhull.vertexList();
-  int vNumber = 0;
-  Eigen::Vector2d center;
-  center << qhull.feasiblePoint()[0], qhull.feasiblePoint()[1]; //, qhull.feasiblePoint()[2];
+  //std::cout<<"The center is "<<  qhull.feasiblePoint()[0]<<", "<< qhull.feasiblePoint()[1]<<std::endl;
+  //center << qhull.feasiblePoint()[0], qhull.feasiblePoint()[1]; //, qhull.feasiblePoint()[2];
 
-  // int vNumber = 0;
+  int qhullVertexNumer = qhull.vertexCount();
+  std::cout<<"The qhull points num is: "<<qhullVertexNumer<<std::endl;
+  //pointsOut.resize(qhullVertexNumer);
+
+  int vNumber = 0;
   for(auto ii = tempVertexList.begin(); ii != tempVertexList.end(); ++ii, ++vNumber)
   {
 
+    std::cout<<"Processing qhull point "<<  ii->point().coordinates()[0]<<", "<< ii->point().coordinates()[1]<<std::endl;
+
+    //pointsOut.push_back({ii->point().coordinates()[0], ii->point().coordinates()[1]});
     pointsOut.emplace_back(ii->point().coordinates()[0], ii->point().coordinates()[1]);
 
     Eigen::Vector2d point_one, point_two;
