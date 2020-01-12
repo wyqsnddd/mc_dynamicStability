@@ -18,13 +18,7 @@ constexpr int McZMPArea<Point>::GM_SIZE;
 
 template<typename Point>
 constexpr int McZMPArea<Point>::RM_SIZE;
-
-template<typename Point>
-McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
-                            std::shared_ptr<McContactSet> contactSetPtr,
-                            const McZMPAreaParams & mcZMPAreaParams)
-: robot_(robot), contactsPtr_(contactSetPtr), McZMPAreaParams_(mcZMPAreaParams)
-{
+template<typename Point> McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot, std::shared_ptr<McContactSet> contactSetPtr, const McZMPAreaParams & mcZMPAreaParams) : robot_(robot), contactsPtr_(contactSetPtr), McZMPAreaParams_(mcZMPAreaParams) {
   // pdPtr_ = std::make_shared<McPolytopeDescriptor>();
   pdPtr_.reset(new McPolytopeDescriptor());
 
@@ -54,17 +48,11 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
   polygonVertices_.emplace_back(0.15, 0.12);
 
   // Initialize the vairables.
-  computeMcZMPArea();
+  computeMcZMPArea(2.0);
 
   std::cout << "McZMPArea is created." << std::endl;
 }
-
-template<typename Point>
-void McZMPArea<Point>::computeMcZMPArea(double height)
-{
-
-  assert(getContactSet()->getContactMap().size() > 0);
-
+template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) { assert(getContactSet()->getContactMap().size() > 0); 
   int numContact = static_cast<int>(getContactSet()->getContactMap().size());
   int rowCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().rows());
   int colCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().cols());
@@ -92,10 +80,12 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   for(auto & contactPair : getContactSet()->getContactMap())
   {
     Eigen::Matrix6d tempGraspMatrix;
-    contactPair.second.calcGeometricGraspMatrix(tempGraspMatrix, getRobot());
-    // contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
+    //Eigen::Matrix6d testMatrix;
+    //contactPair.second.calcGeometricGraspMatrix(testMatrix, getRobot());
+    contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
     // std::cout<<"The local cwc matrix is: "<< std::endl<<contactPair.second.contactWrenchCone()<<std::endl;
-    // std::cout<<"The grasp matrix is: "<< std::endl<< tempGraspMatrix <<std::endl;
+    //std::cout<<"The grasp matrix is: "<< std::endl<< tempGraspMatrix <<std::endl;
+    //std::cout<<"The difference is: "<< std::endl<< tempGraspMatrix - tempGraspMatrix <<std::endl;
 
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
         contactPair.second.contactWrenchCone() * tempGraspMatrix;
@@ -106,12 +96,51 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
     G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
     count++;
   }
+ /*  hard-coded matrices when there are leftFoot and rightHand contacts: 
+  pdPtr_->getF().block(0,0, numContact * rowCWC, numContact * colCWC)<<
+                                                                          1.00004223e+00, -8.39840090e-04, -4.94888704e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 
+                                                                         -9.99957583e-01, -1.68368013e-03, -4.95057570e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                         -3.79378928e-04,  9.98734902e-01, -4.97522313e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          4.64027902e-04, -1.00125842e+00, -4.92423961e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          5.55804446e-06, -1.65250808e-04, -6.50065133e-02,  9.99999907e-01,  4.21920019e-04,  8.44331097e-05,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          5.55804446e-06, -1.66137440e-04, -6.49930639e-02, -9.99999907e-01, -4.21920019e-04, -8.44331097e-05,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          1.07040932e-05, -3.05896844e-04, -1.20044782e-01, -4.21703415e-04,  9.99996662e-01, -2.54917621e-03,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          9.81791716e-06, -3.05896844e-04, -1.19954438e-01,  4.21703415e-04, -9.99996662e-01,  2.54917621e-03,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          6.49638106e-02,  1.19838551e-01, -9.18447557e-02, -4.94680460e-01, -4.97731075e-01, -9.98776762e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          6.50654581e-02, -1.20160648e-01, -9.12776715e-02, -4.95097925e-01,  4.92215114e-01, -1.00130032e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                         -6.50361773e-02,  1.19784140e-01, -9.18623891e-02,  4.95268942e-01, -4.97313395e-01, -9.98693177e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                         -6.49345299e-02, -1.20215059e-01, -9.12953050e-02,  4.94851477e-01,  4.92632794e-01, -1.00121673e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                         -6.49485892e-02, -1.20305841e-01, -9.12439297e-02, -4.94851477e-01, -4.92632794e-01,  1.00121673e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                         -6.50493594e-02,  1.19693358e-01, -9.19004501e-02, -4.95268942e-01,  4.97313395e-01,  9.98693177e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          6.50513988e-02, -1.20250552e-01, -9.12396105e-02,  4.95097925e-01, -4.92215114e-01,  1.00130032e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          6.49506286e-02,  1.19748647e-01, -9.18961309e-02,  4.94680460e-01,  4.97731075e-01,  9.98776762e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -4.11644291e-02,  1.02694087e+00, -4.34393752e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -3.65458326e-01, -9.46361406e-01, -4.64586161e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -1.10052483e+00,  1.81335707e-01, -3.10236383e-02,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  6.93902072e-01, -1.00756239e-01, -8.67956275e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -1.64300404e-02,  6.65102473e-01, -3.25261897e-02,  1.62146949e-01,  9.86651140e-01,  1.50962041e-02,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -1.64300404e-02, -6.58590669e-01, -4.01223580e-02, -1.62146949e-01, -9.86651140e-01, -1.50962041e-02,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  5.77206618e-01,  4.88385324e-03, -1.72932081e-02, -8.97213449e-01,  1.41045973e-01,  4.18466318e-01,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -6.26496740e-01,  4.88385324e-03, -9.16796135e-02,  8.97213449e-01, -1.41045973e-01, -4.18466318e-01,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -2.62237781e-01, -2.82874160e-01, -3.95268202e-02, -4.69116559e-02, -4.76784039e-01, -1.12270935e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  4.41230598e-01, -2.99799677e-01, -5.29233863e-02, -9.35107656e-01, -3.37155649e-01, -7.08448827e-01,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -2.75209537e-01,  2.93388427e-01, -3.69746050e-02,  1.13605634e-01,  4.99950757e-01, -1.10776487e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  4.28258842e-01,  2.76462910e-01, -5.03711711e-02, -7.74590366e-01,  6.39579147e-01, -6.93504347e-01,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -3.74227260e-01, -3.64262571e-01, -9.09504747e-02,  7.74590366e-01, -6.39579147e-01,  6.93504347e-01,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.13909891e-01, -3.47337055e-01, -3.91512440e-03, -1.13605634e-01, -4.99950757e-01,  1.10776487e+00,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -3.61255504e-01,  3.69864198e-01, -8.59828669e-02,  9.35107656e-01,  3.37155649e-01,  7.08448827e-01,
+                                                                          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.26881647e-01,  3.86789715e-01,  1.05248343e-03,  4.69116559e-02,  4.76784039e-01,  1.12270935e+00;
 
+	 */ 
+
+
+  // These lines are added to limit the maximum search range. 
   pdPtr_->getF().bottomRightCorner(4, 2)(0, 0) = 1.0;
   pdPtr_->getF().bottomRightCorner(4, 2)(1, 0) = -1.0;
   pdPtr_->getF().bottomRightCorner(4, 2)(2, 1) = 1.0;
   pdPtr_->getF().bottomRightCorner(4, 2)(3, 1) = -1.0;
 
+   
   pdPtr_->getf().tail(4).setOnes();
   pdPtr_->getf().tail(4) = pdPtr_->getf().tail(4) * 100000;
 
@@ -146,6 +175,7 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
 
   // Matrix E:
 
+  //std::cout<<"The projected height is: "<<height <<" ----------------------------"<<std::endl;
   pdPtr_->getA().block(assumptionSize, 0, 2, GM_SIZE * numContact) =
       (height - getRobot().com().z()) / (mass * 9.81) * G.block(0, 0, 2, GM_SIZE * numContact);
   pdPtr_->getA().block<2, 2>(assumptionSize, GM_SIZE * numContact) = -Eigen::Matrix2d::Identity();
@@ -265,7 +295,7 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
  -6.48025701e-02, -1.20162325e-01, -6.51974503e-02,  3.54183639e-01,  3.51240462e-01, -1.00059187e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
  -6.49382335e-02, -1.20248416e-01, -6.51194689e-02, -3.54183639e-01, -3.51240462e-01,  1.00059187e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
  -6.50858669e-02,  1.19750770e-01, -6.57572311e-02, -3.54620016e-01,  3.55863919e-01,  9.98802040e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
-  6.50616950e-02, -1.20167430e-01, -6.50570574e-02,  3.52922753e-01, -3.50802568e-01,  1.00119084e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+  50e-02, -1.20167430e-01, -6.50570574e-02,  3.52922753e-01, -3.50802568e-01,  1.00119084e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
   6.49140615e-02,  1.19831755e-01, -6.56948196e-02,  3.52486376e-01,  3.56301814e-01,  9.99401007e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
   0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  9.99980205e-01,  4.90383009e-04, -3.53609035e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
   0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, -1.00001974e+00,  9.51440502e-04, -3.53496275e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
@@ -384,6 +414,7 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   
   // pdPtr_->getB() << -getRobot().com().x(), -getRobot().com().y();
 
+	  /*
   std::cout << "A matrix is: " << std::endl << pdPtr_->getA() << std::endl;
   std::cout << "A matrix size is: " << std::endl << pdPtr_->getA().rows() << ", " << pdPtr_->getA().cols() << std::endl;
   std::cout << "B vector is: " << std::endl << pdPtr_->getB().transpose() << std::endl;
@@ -396,6 +427,7 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
 
   std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
 
+  */
   polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, getParams().iterationLimit,
                                                                     getParams().convergeThreshold, GLPK);
 
@@ -408,18 +440,20 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
 
   polygonVertices_.clear();
 
-  std::cout << "The stabiliPlus vertices are: " << std::endl;
+  //std::cout << "The stabiliPlus vertices are: " << std::endl;
+ /* 
   for(auto & point : polytopeProjectorPtr_->getPolygonVerticies())
   {
     std::cout << point->innerVertex().transpose() << " with search direction:" << point->searchDir().transpose()
               << std::endl;
   }
-
   std::cout << "End of StabiliPlus verticies." << std::endl;
 
+  */
   // Construct the matrices:
   pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), ieqConstraintBlocks_.G_zmp,
                                         ieqConstraintBlocks_.h_zmp, polygonVertices_, LOWER_SLOPE, UPPER_SLOPE);
+
   std::cout << "The projected vertices are: " << std::endl;
   for(auto & point : polygonVertices_)
   {
@@ -444,21 +478,20 @@ void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::Matri
   B.block<3, 3>(0, 3) = crossUz;
   // B.block<1, 3>(3, 3) = getRobot().com().transpose();
 
-  /*
+  
   B.block<1, 3>(3, 0) = -(crossUz * getRobot().com()).transpose();
   B.block<1, 3>(3, 3) = Eigen::Vector3d::UnitZ().transpose();
-  */
+  
 
-  B.block<1, 3>(3, 3) = getRobot().com().transpose();
+  //B.block<1, 3>(3, 3) = getRobot().com().transpose();
 
   // Matrix C:
   pdPtr_->getA().block(0, 0, 4, GM_SIZE * numContact) = 1.0 / (getRobot().mass() * 9.81) * (B * inputG);
 
-  std::cout << "Intermediate: Matrix  B is: " << std::endl << B << std::endl;
+  //std::cout << "Intermediate: Matrix  B is: " << std::endl << B << std::endl;
 }
 
 // Instantiate the McZMPArea
 template class mc_impact::McZMPArea<Eigen::Vector3d>;
 template class mc_impact::McZMPArea<Eigen::Vector2d>;
-
-} // namespace mc_impact
+}

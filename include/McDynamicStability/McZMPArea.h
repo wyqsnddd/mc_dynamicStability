@@ -57,7 +57,7 @@ public:
    * \param  zmpVerticies saves the updated verticies of the ZMP
    * \param  height of the surface where the ZMP is projected. The default value is 0.0.
    */
-  void computeMcZMPArea(double height = 0.0);
+  void computeMcZMPArea(double height);
 
   /*! Obtain a reference to the robot.
    */

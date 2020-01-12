@@ -18,26 +18,41 @@ void McContact::calcGeometricGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Ro
   G.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
   G.block<3, 3>(3, 3) = G.block<3, 3>(0, 0);
 
-  G.block<3, 3>(3, 0) = -X_0_c.rotation().transpose() * crossMatrix(X_0_c.translation());
+  G.block<3, 3>(3, 0) = - G.block<3, 3>(0, 0) * crossMatrix(X_0_c.translation());
+  /*
+  G<<
+ -0.16214695, -0.98665114, -0.0150962 ,  0.        ,  0.        ,  0.        ,  
+  0.89721345, -0.14104597, -0.41846632,  0.        ,  0.        ,  0.        ,
+  0.41075101, -0.08139755,  0.90810685,  0.        ,  0.        ,  0.        ,
+  0.        ,  0.10849315, -0.00440193, -0.16214695, -0.98665114, -0.0150962 ,
+  0.09865849,  0.        , -0.01626989,  0.89721345, -0.14104597, -0.41846632,
+ -0.11977171,  0.00316472, -0.        ,  0.41075101, -0.08139755,  0.90810685;
 
-  // std::cout<<"Contact: "<<getContactParams().surfaceName<<", link number:
-  // "<<realRobot.bodyIndexByName(getContactParams().bodyName)<<std::endl; std::cout<<"Translation: "<<
-  // X_0_c.translation().transpose()<<std::endl; std::cout<<"Rotation: "<<std::endl<< X_0_c.rotation()<<std::endl;
+ */
+   std::cout<<"Contact: "<<getContactParams().surfaceName<<", link number:"
+	   <<realRobot.bodyIndexByName(getContactParams().bodyName)<<std::endl; std::cout<<"Translation: "<<
+	   X_0_c.translation().transpose()<<std::endl; std::cout<<"Rotation: "<<std::endl<< X_0_c.rotation()<<std::endl;
 
-  // Eigen::Quaterniond q(X_0_c.rotation());
-  // std::cout<<"Quaternion: "<<q.coeffs()<<std::endl;
+   Eigen::Quaterniond q(X_0_c.rotation());
+   std::cout<<"Quaternion: "<<q.coeffs()<<std::endl;
 
-  // Eigen::Vector3d euler = X_0_c.rotation().eulerAngles(2, 1, 0);
+   //Eigen::Vector3d euler = X_0_c.rotation().eulerAngles(2, 1, 0);
 
-  // std::cout<<"yaw: "<< euler(0, 0)<<", pitch: "<<euler(1,0)<<", roll: "<<euler(3,0)<<std::endl;
+   //std::cout<<"yaw: "<< euler(0, 0)<<", pitch: "<<euler(1,0)<<", roll: "<<euler(3,0)<<std::endl;
 
-  // std::cout<<"The robot com position: "<< realRobot.com().transpose()<<", mass"<<realRobot.mass()<<std::endl;
+   std::cout<<"The robot com position: "<< realRobot.com().transpose()<<", mass"<<realRobot.mass()<<std::endl;
 }
+
 void McContact::calcGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Robot & realRobot) const
 {
   sva::PTransformd X_c_0 = realRobot.surfacePose(getContactParams().surfaceName).inv();
 
   G = X_c_0.dualMatrix();
+
+  G.block<3, 3>(3, 0) = G.block<3, 3>(0, 3);
+
+  G.block<3, 3>(0, 3).setZero();
+  //std::cout<<"The grasp matrix is: "<<std::endl<<G<<std::endl;
 }
 
 void McContact::updateCWC()

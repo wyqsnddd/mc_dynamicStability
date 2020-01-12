@@ -187,16 +187,18 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<std::shared_ptr<Point
   // std::cout<<"The center is "<<  qhull.feasiblePoint()[0]<<", "<< qhull.feasiblePoint()[1]<<std::endl;
   // center << qhull.feasiblePoint()[0], qhull.feasiblePoint()[1]; //, qhull.feasiblePoint()[2];
 
-  int qhullVertexNumer = qhull.vertexCount();
-  std::cout << "The qhull points num is: " << qhullVertexNumer << std::endl;
+  //int qhullVertexNumer = qhull.vertexCount();
+  //std::cout << "The qhull points num is: " << qhullVertexNumer << std::endl;
   // pointsOut.resize(qhullVertexNumer);
 
   int vNumber = 0;
   for(auto ii = tempVertexList.begin(); ii != tempVertexList.end(); ++ii, ++vNumber)
   {
 
+    /*
     std::cout << "Processing qhull point " << ii->point().coordinates()[0] << ", " << ii->point().coordinates()[1]
               << std::endl;
+	      */
 
     // pointsOut.push_back({ii->point().coordinates()[0], ii->point().coordinates()[1]});
     pointsOut.emplace_back(ii->point().coordinates()[0], ii->point().coordinates()[1]);
