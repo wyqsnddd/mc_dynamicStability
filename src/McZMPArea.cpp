@@ -22,26 +22,7 @@ template<typename Point> McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & rob
   // pdPtr_ = std::make_shared<McPolytopeDescriptor>();
   pdPtr_.reset(new McPolytopeDescriptor());
 
-  /*
-  polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, getParams().iterationLimit,
-                                                                    getParams().convergeThreshold, GLPK);
-
-                    */
   // Fill in the initial values:
-  /*
-  polygonVertices_.emplace_back(-0.10, 0.18);
-  polygonVertices_.emplace_back(0.14, 0.18);
-  polygonVertices_.emplace_back(0.14, -0.18);
-  polygonVertices_.emplace_back(-0.10, -0.18);
-  */
-
-  /*
-  polygonVertices_.emplace_back(-0.12, 0.1);
-  polygonVertices_.emplace_back(-0.12, -0.1);
-  polygonVertices_.emplace_back(0.12, -0.1);
-  polygonVertices_.emplace_back(0.12, 0.1);
-  */
-
   polygonVertices_.emplace_back(-0.15, 0.12);
   polygonVertices_.emplace_back(-0.15, -0.12);
   polygonVertices_.emplace_back(0.15, -0.12);
@@ -80,22 +61,16 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
   for(auto & contactPair : getContactSet()->getContactMap())
   {
     Eigen::Matrix6d tempGraspMatrix;
-    //Eigen::Matrix6d testMatrix;
-    //contactPair.second.calcGeometricGraspMatrix(testMatrix, getRobot());
+    //contactPair.second.calcGeometricGraspMatrix(tempGraspMatrix, getRobot()); // Gives the same result. 
     contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
-    // std::cout<<"The local cwc matrix is: "<< std::endl<<contactPair.second.contactWrenchCone()<<std::endl;
-    //std::cout<<"The grasp matrix is: "<< std::endl<< tempGraspMatrix <<std::endl;
-    //std::cout<<"The difference is: "<< std::endl<< tempGraspMatrix - tempGraspMatrix <<std::endl;
 
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
         contactPair.second.contactWrenchCone() * tempGraspMatrix;
-    // std::cout<<"The cwc matrix is: "<< std::endl<<pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC,
-    // colCWC)<<std::endl;
 
-    // G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = tempGraspMatrix;
     G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
     count++;
   }
+
  /*  hard-coded matrices when there are leftFoot and rightHand contacts: 
   pdPtr_->getF().block(0,0, numContact * rowCWC, numContact * colCWC)<<
                                                                           1.00004223e+00, -8.39840090e-04, -4.94888704e-01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 
@@ -146,13 +121,11 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
 
   ///-------------Part: Equality constraint: C X = d
 
-  // Eigen::MatrixXd C; ///< Equality constraint that specifies the assumptions: (1) z acceleration = 0.0 (2) zero
-  // angular momentum.
-  // Eigen::Vector4d d;
-
   int assumptionSize = 4;
-
-  // Update the matrices according to the LIPM assumptions:
+  // Update the matrices according to the LIPM assumptions: 
+  /* (1) z acceleration = 0.0 
+   * (2) zero angular momentum.
+   */
   if(!getParams().useLIPMAssumptions)
   {
     assumptionSize = 0;
@@ -169,23 +142,16 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
   }
 
   ///-------------Part: Projection E X = f
-  // Projection
-  // Eigen::MatrixXd E; ///< The equality constraints that specify the projection: polytope -> polygon (on the surface).
-  // Eigen::Vector2d f;
+  /* 
+   * The equality constraints that specify the projection: polytope -> polygon (on the surface).
+   */
 
-  // Matrix E:
-
-  //std::cout<<"The projected height is: "<<height <<" ----------------------------"<<std::endl;
+  // This is the Matrix E: 
   pdPtr_->getA().block(assumptionSize, 0, 2, GM_SIZE * numContact) =
       (height - getRobot().com().z()) / (mass * 9.81) * G.block(0, 0, 2, GM_SIZE * numContact);
   pdPtr_->getA().block<2, 2>(assumptionSize, GM_SIZE * numContact) = -Eigen::Matrix2d::Identity();
 
-  /*
-  pdPtr_->getA().block(0, 0, 2, GM_SIZE*numContact) = (height - getRobot().com().z()) / (mass * 9.81) * G.block(0, 0, 2,
-  GM_SIZE*numContact); pdPtr_->getA().block<2,2>(0, GM_SIZE*numContact) = -Eigen::Matrix2d::Identity();
-  */
-
-  // Vector f:
+  // This is the Vector f:
   pdPtr_->getB().tail<2>() << -getRobot().com().x(), -getRobot().com().y();
 
   //------------------------ We hard-coded the building blocks for a single-contact case for debugging purposes.  
@@ -435,32 +401,40 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
 
   polytopeProjectorPtr_->projectionStabilityPolyhedron();
 
-  numVertex_ = static_cast<int>(polytopeProjectorPtr_->getPolygonVerticies().size());
-  // numVertex_ = static_cast<int>(polytopeProjectorPtr_->constraintPlanes().size());
+  numVertex_ = static_cast<int>(polytopeProjectorPtr_->getInnerVertices().size());
 
   polygonVertices_.clear();
 
-  //std::cout << "The stabiliPlus vertices are: " << std::endl;
- /* 
-  for(auto & point : polytopeProjectorPtr_->getPolygonVerticies())
+  if(getParams().debug)
   {
-    std::cout << point->innerVertex().transpose() << " with search direction:" << point->searchDir().transpose()
-              << std::endl;
-  }
-  std::cout << "End of StabiliPlus verticies." << std::endl;
+    std::cerr<< "The stabiliPlus vertices are: " << std::endl;
+  
+    for(auto & point : polytopeProjectorPtr_->getInnerVertices())
+    {
+	    std::cerr<< point.transpose() << std::endl;
+    }
+    std::cerr<< "End of StabiliPlus verticies." << std::endl;
 
-  */
+  }
+  
   // Construct the matrices:
-  pointsToInequalityMatrix<StaticPoint>(polytopeProjectorPtr_->getPolygonVerticies(), ieqConstraintBlocks_.G_zmp,
+  /*
+  pointsToInequalityMatrix<Point>(polytopeProjectorPtr_->getInnerVertices(), ieqConstraintBlocks_.G_zmp,
                                         ieqConstraintBlocks_.h_zmp, polygonVertices_, LOWER_SLOPE, UPPER_SLOPE);
+					*/
+  polygonVertices_ = polytopeProjectorPtr_->getInnerVertices();
+  pointsToInequalityMatrix<Point>(polytopeProjectorPtr_->getInnerVertices(), ieqConstraintBlocks_.G_zmp,
+                                        ieqConstraintBlocks_.h_zmp, LOWER_SLOPE, UPPER_SLOPE);
 
-  std::cout << "The projected vertices are: " << std::endl;
-  for(auto & point : polygonVertices_)
+  if(getParams().debug)
   {
-    std::cout << point.transpose() << std::endl;
+    std::cerr<< "The projected vertices are: " << std::endl;
+    for(auto & point : polygonVertices_)
+    {
+	    std::cerr<< point.transpose() << std::endl;
+    }
+    std::cerr<< "--------------------------------" << std::endl;
   }
-
-  std::cout << "--------------------------------" << std::endl;
 }
 
 template<typename Point>
@@ -476,22 +450,21 @@ void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::Matri
   B.block<3, 3>(0, 0).setIdentity();
   B.block<3, 3>(0, 0) *= getRobot().com().z();
   B.block<3, 3>(0, 3) = crossUz;
-  // B.block<1, 3>(3, 3) = getRobot().com().transpose();
 
   
   B.block<1, 3>(3, 0) = -(crossUz * getRobot().com()).transpose();
   B.block<1, 3>(3, 3) = Eigen::Vector3d::UnitZ().transpose();
   
-
-  //B.block<1, 3>(3, 3) = getRobot().com().transpose();
-
   // Matrix C:
   pdPtr_->getA().block(0, 0, 4, GM_SIZE * numContact) = 1.0 / (getRobot().mass() * 9.81) * (B * inputG);
 
-  //std::cout << "Intermediate: Matrix  B is: " << std::endl << B << std::endl;
+  if(getParams().debug)
+  {
+    std::cerr<< "Intermediate: Matrix  B is: " << std::endl << B << std::endl;
+  }
 }
 
 // Instantiate the McZMPArea
-template class mc_impact::McZMPArea<Eigen::Vector3d>;
+//template class mc_impact::McZMPArea<Eigen::Vector3d>;
 template class mc_impact::McZMPArea<Eigen::Vector2d>;
 }

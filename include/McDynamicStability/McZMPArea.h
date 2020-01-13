@@ -26,6 +26,7 @@ struct McZMPAreaParams
   unsigned iterationLimit = 50;
   double convergeThreshold = 0.01;
   bool useLIPMAssumptions = true;
+  bool debug = false;
 };
 
 template<typename Point>

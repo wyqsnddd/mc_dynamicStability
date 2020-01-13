@@ -28,7 +28,7 @@ void McContact::calcGeometricGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Ro
   0.09865849,  0.        , -0.01626989,  0.89721345, -0.14104597, -0.41846632,
  -0.11977171,  0.00316472, -0.        ,  0.41075101, -0.08139755,  0.90810685;
 
- */
+ 
    std::cout<<"Contact: "<<getContactParams().surfaceName<<", link number:"
 	   <<realRobot.bodyIndexByName(getContactParams().bodyName)<<std::endl; std::cout<<"Translation: "<<
 	   X_0_c.translation().transpose()<<std::endl; std::cout<<"Rotation: "<<std::endl<< X_0_c.rotation()<<std::endl;
@@ -41,6 +41,7 @@ void McContact::calcGeometricGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Ro
    //std::cout<<"yaw: "<< euler(0, 0)<<", pitch: "<<euler(1,0)<<", roll: "<<euler(3,0)<<std::endl;
 
    std::cout<<"The robot com position: "<< realRobot.com().transpose()<<", mass"<<realRobot.mass()<<std::endl;
+*/
 }
 
 void McContact::calcGraspMatrix(Eigen::Matrix6d & G, const mc_rbdyn::Robot & realRobot) const
