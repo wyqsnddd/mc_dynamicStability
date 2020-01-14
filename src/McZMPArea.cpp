@@ -394,6 +394,7 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
   std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
 
   */
+
   polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, getParams().iterationLimit,
                                                                     getParams().convergeThreshold, GLPK);
 
@@ -423,7 +424,16 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
                                         ieqConstraintBlocks_.h_zmp, polygonVertices_, LOWER_SLOPE, UPPER_SLOPE);
 					*/
   polygonVertices_ = polytopeProjectorPtr_->getInnerVertices();
-  pointsToInequalityMatrix<Point>(polytopeProjectorPtr_->getInnerVertices(), ieqConstraintBlocks_.G_zmp,
+  std::vector<Eigen::Vector2d> newPoints = polytopeProjectorPtr_->getInnerVertices();
+
+
+  removeDuplicates(newPoints);
+  std::cerr<< "The filtered vertices are: " << std::endl;
+  for(auto & point : newPoints)
+  {
+    std::cerr<< point.transpose() << std::endl;
+  }
+  pointsToInequalityMatrix<Point>(polygonVertices_, ieqConstraintBlocks_.G_zmp,
                                         ieqConstraintBlocks_.h_zmp, LOWER_SLOPE, UPPER_SLOPE);
 
   if(getParams().debug)

@@ -336,6 +336,8 @@ void mc_impact::pointsToInequalityMatrixSimple(const std::vector<Point> & inputP
     }
 
     Eigen::Vector2d difference = point_two - point_one;
+    if (difference.norm() < 0.00001)
+	continue;
     // difference.normalize();
     double slope = difference.y() / difference.x();
 
@@ -371,4 +373,91 @@ template void mc_impact::pointsToInequalityMatrixSimple<Eigen::Vector3d>(
     double maxSlope);
 
 
+void mc_impact::removeDuplicates(std::vector<Eigen::Vector2d>& vec)
+{
+ 
+    // If we would like to store values, we should use std::unordered_map.
+    std::unordered_set<Eigen::Vector2d, mc_impact::ApproxHash, mc_impact::ApproxEqual> pointSet;  
+
+    auto ii = vec.begin();
+    while (ii != vec.end())
+    {
+
+	//std::cerr<<yellow<<"Processing: "<<ii->transpose()<<reset<<std::endl;
+        if (pointSet.find(*ii) != pointSet.end())   // O(1) lookup time for unordered_set
+        {
+	
+	    //std::cerr<<red<<"Found duplicate: "<<ii->transpose()<<reset<<std::endl;
+            vec.erase(ii); // vec.erase returns the next valid iterator
+        }
+        else
+        {
+            pointSet.insert(*ii);
+	    //std::cerr<<green<<"Inserted: "<<ii->transpose()<<reset<<std::endl;
+
+	    //std::cout<<"pointset size: "<<pointset.size()<<std::endl;
+
+	    /*
+	    for(auto & jj : pointset){
+	     std::cerr << jj.transpose()<< std::endl;
+	    }
+	    */
+	    //std::cout<<"If inserted: "<<(pointset.find(*ii) == pointset.end())<<std::endl;
+	    ii++;
+        }
+    }
+
+
+   
+    //std::cout<<red<<"unordered pointset size: "<<pointSet.size()<<magenta<<std::endl;
+
+	    
+    for(auto & jj : pointSet){
+      std::cerr << jj.transpose()<< std::endl;
+    }
+
+    std::cerr<<reset;
+} // end of removeDuplicates
+
+/*
+
+bool pointsAreClose(const Eigen::Vector2d & pointOne, const Eigen::Vector2d & pointTwo)
+{
+
+   double threshold = 0.01;
+   if( (fabs(pointOne.x() - pointTwo.x())<threshold )&& (fabs(pointOne.y() - pointTwo.y()) < threshold))
+     return true;
+   else
+     return false;
+}
+void mc_impact::removeDuplicatesSimple(std::vector<Eigen::Vector2d>& inputPoints)
+{
+
+  int vNumber = 0;
+  for(auto ii = inputPoints.begin(); ii != inputPoints.end(); ++ii, ++vNumber)
+  {
+    Eigen::Vector2d point_one, point_two;
+    point_one << ii->x(), ii->y();
+    if((ii + 1) == inputPoints.end())
+    {
+      auto jj = inputPoints.begin();
+      point_two << jj->x(), jj->y();
+    }
+    else
+    {
+      point_two << (ii + 1)->x(), (ii + 1)->y();
+    }
+    if(pointsAreClose(point_one, point_two)){
+      std::cout<<red<<"removed "<<(ii+1)->transpose()<<reset<<std::endl;
+      inputPoints.erase(ii+1);
+    }
+
+  }
+
+
+} // end of removeDuplicates
+
+*/
+
+//template void mc_impact::removeDuplicates<Eigen::Vector2d>(std::vector<Eigen::Vector2d>& vec);
 
