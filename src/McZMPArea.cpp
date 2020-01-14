@@ -402,10 +402,11 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
 
   polytopeProjectorPtr_->projectionStabilityPolyhedron();
 
-  numVertex_ = static_cast<int>(polytopeProjectorPtr_->getInnerVertices().size());
+  //numVertex_ = static_cast<int>(polytopeProjectorPtr_->getInnerVertices().size());
 
   polygonVertices_.clear();
 
+  /*
   if(getParams().debug)
   {
     std::cerr<< "The stabiliPlus vertices are: " << std::endl;
@@ -418,24 +419,22 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
 
   }
   
+  */
   // Construct the matrices:
   /*
   pointsToInequalityMatrix<Point>(polytopeProjectorPtr_->getInnerVertices(), ieqConstraintBlocks_.G_zmp,
                                         ieqConstraintBlocks_.h_zmp, polygonVertices_, LOWER_SLOPE, UPPER_SLOPE);
 					*/
   polygonVertices_ = polytopeProjectorPtr_->getInnerVertices();
-  std::vector<Eigen::Vector2d> newPoints = polytopeProjectorPtr_->getInnerVertices();
+  //std::vector<Eigen::Vector2d> newPoints = polytopeProjectorPtr_->getInnerVertices();
 
 
-  removeDuplicates(newPoints);
-  std::cerr<< "The filtered vertices are: " << std::endl;
-  for(auto & point : newPoints)
-  {
-    std::cerr<< point.transpose() << std::endl;
-  }
+  removeDuplicates(polygonVertices_);
+  //std::cerr<< "The filtered vertices are: " << std::endl;
   pointsToInequalityMatrix<Point>(polygonVertices_, ieqConstraintBlocks_.G_zmp,
                                         ieqConstraintBlocks_.h_zmp, LOWER_SLOPE, UPPER_SLOPE);
 
+  /*
   if(getParams().debug)
   {
     std::cerr<< "The projected vertices are: " << std::endl;
@@ -445,7 +444,9 @@ template<typename Point> void McZMPArea<Point>::computeMcZMPArea(double height) 
     }
     std::cerr<< "--------------------------------" << std::endl;
   }
+  */
 }
+
 
 template<typename Point>
 void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & inputG)

@@ -387,7 +387,7 @@ void mc_impact::removeDuplicates(std::vector<Eigen::Vector2d>& vec)
         if (pointSet.find(*ii) != pointSet.end())   // O(1) lookup time for unordered_set
         {
 	
-	    //std::cerr<<red<<"Found duplicate: "<<ii->transpose()<<reset<<std::endl;
+	    std::cerr<<red<<"Found duplicate: "<<ii->transpose()<<reset<<std::endl;
             vec.erase(ii); // vec.erase returns the next valid iterator
         }
         else
