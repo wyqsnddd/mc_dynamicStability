@@ -85,7 +85,7 @@ public:
 
   inline int getMaxNumVertex() const
   {
-    // Each iteration should generate a new vetex. 
+    // Each iteration should generate a new vetex.
     return polytopeProjectorPtr_->getMaxIteration();
   }
   inline const std::vector<Eigen::Vector2d> & getPolygonVertices()

@@ -131,7 +131,7 @@ template void mc_impact::pointsToInequalityMatrix<StaticPoint>(const std::vector
                                                                double miniSlope,
                                                                double maxSlope);
 
-							       */
+                     */
 template<typename Point>
 void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                                          Eigen::MatrixXd & G,
@@ -142,7 +142,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
 {
 
   int points_size = static_cast<int>(inputPoints.size());
-  //std::cerr<< "The input points size is: " << points_size << std::endl;
+  // std::cerr<< "The input points size is: " << points_size << std::endl;
   // pointsOut.resize(points_size);
 
   int dim = static_cast<int>(inputPoints[0].size());
@@ -167,7 +167,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
   center.x() = center.x() / (double)points_size;
   center.y() = center.y() / (double)points_size;
 
-  //std::cerr "The center is: " << center.transpose() << std::endl;
+  // std::cerr "The center is: " << center.transpose() << std::endl;
 
   // Preprocess the points: order the vertices.
   orgQhull::Qhull qhull;
@@ -189,8 +189,8 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
   // std::cout<<"The center is "<<  qhull.feasiblePoint()[0]<<", "<< qhull.feasiblePoint()[1]<<std::endl;
   // center << qhull.feasiblePoint()[0], qhull.feasiblePoint()[1]; //, qhull.feasiblePoint()[2];
 
-  //int qhullVertexNumer = qhull.vertexCount();
-  //std::cout << "The qhull points num is: " << qhullVertexNumer << std::endl;
+  // int qhullVertexNumer = qhull.vertexCount();
+  // std::cout << "The qhull points num is: " << qhullVertexNumer << std::endl;
   // pointsOut.resize(qhullVertexNumer);
 
   int vNumber = 0;
@@ -200,7 +200,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
     /*
     std::cerr<< "Processing qhull point " << ii->point().coordinates()[0] << ", " << ii->point().coordinates()[1]
               << std::endl;
-	      */
+        */
 
     // pointsOut.push_back({ii->point().coordinates()[0], ii->point().coordinates()[1]});
     pointsOut.emplace_back(ii->point().coordinates()[0], ii->point().coordinates()[1]);
@@ -239,21 +239,19 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
 
 } // end of pointsToInequalityMatrix
 
-template void mc_impact::pointsToInequalityMatrix<Eigen::Vector2d>(
-    const std::vector<Eigen::Vector2d> & inputPoints,
-    Eigen::MatrixXd & G,
-    Eigen::VectorXd & h,
-    std::vector<Eigen::Vector2d> & points,
-    double miniSlope,
-    double maxSlope);
+template void mc_impact::pointsToInequalityMatrix<Eigen::Vector2d>(const std::vector<Eigen::Vector2d> & inputPoints,
+                                                                   Eigen::MatrixXd & G,
+                                                                   Eigen::VectorXd & h,
+                                                                   std::vector<Eigen::Vector2d> & points,
+                                                                   double miniSlope,
+                                                                   double maxSlope);
 
-template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(
-    const std::vector<Eigen::Vector3d> & inputPoints,
-    Eigen::MatrixXd & G,
-    Eigen::VectorXd & h,
-    std::vector<Eigen::Vector2d> & points,
-    double miniSlope,
-    double maxSlope);
+template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(const std::vector<Eigen::Vector3d> & inputPoints,
+                                                                   Eigen::MatrixXd & G,
+                                                                   Eigen::VectorXd & h,
+                                                                   std::vector<Eigen::Vector2d> & points,
+                                                                   double miniSlope,
+                                                                   double maxSlope);
 /*
 template void mc_impact::pointsToInequalityMatrix<StaticPoint>(
     const std::vector<StaticPoint> & inputPoints,
@@ -264,17 +262,16 @@ template void mc_impact::pointsToInequalityMatrix<StaticPoint>(
     double maxSlope);
     */
 
-
 template<typename Point>
 void mc_impact::pointsToInequalityMatrixSimple(const std::vector<Point> & inputPoints,
-                                         Eigen::MatrixXd & G,
-                                         Eigen::VectorXd & h,
-                                         double miniSlope,
-                                         double maxSlope)
+                                               Eigen::MatrixXd & G,
+                                               Eigen::VectorXd & h,
+                                               double miniSlope,
+                                               double maxSlope)
 {
 
   int points_size = static_cast<int>(inputPoints.size());
-  //std::cerr<< "The input points size is: " << points_size << std::endl;
+  // std::cerr<< "The input points size is: " << points_size << std::endl;
   // pointsOut.resize(points_size);
 
   int dim = static_cast<int>(inputPoints[0].size());
@@ -292,7 +289,7 @@ void mc_impact::pointsToInequalityMatrixSimple(const std::vector<Point> & inputP
   center.x() = center.x() / (double)points_size;
   center.y() = center.y() / (double)points_size;
 
-  //std::cerr "The center is: " << center.transpose() << std::endl;
+  // std::cerr "The center is: " << center.transpose() << std::endl;
 
   G.resize(points_size, dim);
   h.resize(points_size);
@@ -307,8 +304,8 @@ void mc_impact::pointsToInequalityMatrixSimple(const std::vector<Point> & inputP
   // std::cout<<"The center is "<<  qhull.feasiblePoint()[0]<<", "<< qhull.feasiblePoint()[1]<<std::endl;
   // center << qhull.feasiblePoint()[0], qhull.feasiblePoint()[1]; //, qhull.feasiblePoint()[2];
 
-  //int qhullVertexNumer = qhull.vertexCount();
-  //std::cout << "The qhull points num is: " << qhullVertexNumer << std::endl;
+  // int qhullVertexNumer = qhull.vertexCount();
+  // std::cout << "The qhull points num is: " << qhullVertexNumer << std::endl;
   // pointsOut.resize(qhullVertexNumer);
 
   int vNumber = 0;
@@ -318,7 +315,7 @@ void mc_impact::pointsToInequalityMatrixSimple(const std::vector<Point> & inputP
     /*
     std::cerr<< "Processing qhull point " << ii->point().coordinates()[0] << ", " << ii->point().coordinates()[1]
               << std::endl;
-	      */
+        */
 
     // pointsOut.push_back({ii->point().coordinates()[0], ii->point().coordinates()[1]});
 
@@ -336,8 +333,6 @@ void mc_impact::pointsToInequalityMatrixSimple(const std::vector<Point> & inputP
     }
 
     Eigen::Vector2d difference = point_two - point_one;
-    if (difference.norm() < 0.00001)
-	continue;
     // difference.normalize();
     double slope = difference.y() / difference.x();
 
@@ -372,51 +367,42 @@ template void mc_impact::pointsToInequalityMatrixSimple<Eigen::Vector3d>(
     double miniSlope,
     double maxSlope);
 
-
-void mc_impact::removeDuplicates(std::vector<Eigen::Vector2d>& vec)
+void mc_impact::removeDuplicates(std::vector<Eigen::Vector2d> & vec)
 {
- 
-    // If we would like to store values, we should use std::unordered_map.
-    std::unordered_set<Eigen::Vector2d, mc_impact::ApproxHash, mc_impact::ApproxEqual> pointSet;  
 
-    auto ii = vec.begin();
-    while (ii != vec.end())
+  // If we would like to store values, we should use std::unordered_map.
+  std::unordered_set<Eigen::Vector2d, mc_impact::ApproxHash, mc_impact::ApproxEqual> pointSet;
+
+  auto ii = vec.begin();
+  while(ii != vec.end())
+  {
+
+    // std::cerr<<yellow<<"Processing: "<<ii->transpose()<<reset<<std::endl;
+    if(pointSet.find(*ii) != pointSet.end()) // O(1) lookup time for unordered_set
     {
 
-	//std::cerr<<yellow<<"Processing: "<<ii->transpose()<<reset<<std::endl;
-        if (pointSet.find(*ii) != pointSet.end())   // O(1) lookup time for unordered_set
-        {
-	
-	    std::cerr<<red<<"Found duplicate: "<<ii->transpose()<<reset<<std::endl;
-            vec.erase(ii); // vec.erase returns the next valid iterator
-        }
-        else
-        {
-            pointSet.insert(*ii);
-	    //std::cerr<<green<<"Inserted: "<<ii->transpose()<<reset<<std::endl;
-
-	    //std::cout<<"pointset size: "<<pointset.size()<<std::endl;
-
-	    /*
-	    for(auto & jj : pointset){
-	     std::cerr << jj.transpose()<< std::endl;
-	    }
-	    */
-	    //std::cout<<"If inserted: "<<(pointset.find(*ii) == pointset.end())<<std::endl;
-	    ii++;
-        }
+      // std::cerr<<red<<"Found duplicate: "<<ii->transpose()<<reset<<std::endl;
+      vec.erase(ii); // vec.erase returns the next valid iterator
     }
+    else
+    {
+      pointSet.insert(*ii);
+      // std::cerr<<green<<"Inserted: "<<ii->transpose()<<reset<<std::endl;
 
+      // std::cout<<"pointset size: "<<pointset.size()<<std::endl;
 
-   
-    //std::cout<<red<<"unordered pointset size: "<<pointSet.size()<<magenta<<std::endl;
-
-	    
-    for(auto & jj : pointSet){
-      std::cerr << jj.transpose()<< std::endl;
+      /*
+      for(auto & jj : pointset){
+       std::cerr << jj.transpose()<< std::endl;
+      }
+      */
+      // std::cout<<"If inserted: "<<(pointset.find(*ii) == pointset.end())<<std::endl;
+      ii++;
     }
+  }
 
-    std::cerr<<reset;
+  // std::cout<<red<<"unordered pointset size: "<<pointSet.size()<<magenta<<std::endl;
+
 } // end of removeDuplicates
 
 /*
@@ -459,5 +445,4 @@ void mc_impact::removeDuplicatesSimple(std::vector<Eigen::Vector2d>& inputPoints
 
 */
 
-//template void mc_impact::removeDuplicates<Eigen::Vector2d>(std::vector<Eigen::Vector2d>& vec);
-
+// template void mc_impact::removeDuplicates<Eigen::Vector2d>(std::vector<Eigen::Vector2d>& vec);

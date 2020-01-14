@@ -8,8 +8,8 @@
 #include <libqhullcpp/QhullPoints.h>
 //#include <libqhullcpp/QhullVertexSet.h>
 
-# include <unordered_set>
-# include <cmath>
+#include <cmath>
+#include <unordered_set>
 //# include <boost/container_hash/hash.hpp>
 
 namespace mc_impact
@@ -35,38 +35,36 @@ struct zmpSupportContact
   std::string sensorName;
 };
 
-
-struct ApproxHash 
+struct ApproxHash
 {
- std::size_t operator() (Eigen::Vector2d const& pt) const
- {
+  std::size_t operator()(Eigen::Vector2d const & pt) const
+  {
 
-
-   size_t score = (size_t)(pt.x()*100) + (size_t)(pt.y()*10);
-   //std::cerr <<"Point: "<< pt.transpose()<< " has score: "<<score<<std::endl;
-   return score; 
- }
-
+    size_t score = (size_t)(pt.x() * 100) + (size_t)(pt.y() * 10);
+    // std::cerr <<"Point: "<< pt.transpose()<< " has score: "<<score<<std::endl;
+    return score;
+  }
 };
 
-struct ApproxEqual{
-	// This is used to guarantee that no duplicates should happen when the hash collision happens. 
+struct ApproxEqual
+{
+  // This is used to guarantee that no duplicates should happen when the hash collision happens.
 public:
- bool operator()(const Eigen::Vector2d & pt1, const Eigen::Vector2d & pt2) const {
+  bool operator()(const Eigen::Vector2d & pt1, const Eigen::Vector2d & pt2) const
+  {
     double threshold = 0.0001;
-    bool result = (fabs(pt1.x() - pt2.x())<threshold) && (fabs(pt1.y() - pt2.y())<threshold);
+    bool result = (fabs(pt1.x() - pt2.x()) < threshold) && (fabs(pt1.y() - pt2.y()) < threshold);
 
-    //std::cerr<<cyan<<"Equal is called for: "<< pt1.transpose()<<" and "<<pt2.transpose()<<" which are " << result<<" equal. "<<" xdiff"<< xdiff<<", ydiff"<<ydiff<<reset<<std::endl;
-    return result; 
-}
+    // std::cerr<<cyan<<"Equal is called for: "<< pt1.transpose()<<" and "<<pt2.transpose()<<" which are " << result<<"
+    // equal. "<<" xdiff"<< xdiff<<", ydiff"<<ydiff<<reset<<std::endl;
+    return result;
+  }
 };
 
-
-
-//template<typename Point>
-void removeDuplicates(std::vector<Eigen::Vector2d>& vec);
-void removeDuplicatesNew(std::vector<Eigen::Vector2d>& vec);
-void removeDuplicatesSimple(std::vector<Eigen::Vector2d>& vec);
+// template<typename Point>
+void removeDuplicates(std::vector<Eigen::Vector2d> & vec);
+void removeDuplicatesNew(std::vector<Eigen::Vector2d> & vec);
+void removeDuplicatesSimple(std::vector<Eigen::Vector2d> & vec);
 
 template<typename Point>
 void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
@@ -85,11 +83,10 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
 
 template<typename Point>
 void pointsToInequalityMatrixSimple(const std::vector<Point> & inputPoints,
-                              Eigen::MatrixXd & G,
-                              Eigen::VectorXd & h,
-                              double miniSlope = 0.01,
-                              double maxSlope = 1000.0);
-
+                                    Eigen::MatrixXd & G,
+                                    Eigen::VectorXd & h,
+                                    double miniSlope = 0.01,
+                                    double maxSlope = 1000.0);
 
 Eigen::Matrix3d crossMatrix(const Eigen::Vector3d & input);
 
