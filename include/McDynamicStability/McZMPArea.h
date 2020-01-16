@@ -97,6 +97,12 @@ public:
     return McZMPAreaParams_;
   }
 
+  inline const std::shared_ptr<StaticStabilityPolytope> getProjector()
+  {
+    return polytopeProjectorPtr_; 
+  }
+
+
 private:
   const mc_rbdyn::Robot & robot_;
 
