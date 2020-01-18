@@ -34,12 +34,25 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
   polygonVertices_.emplace_back(0.15, 0.12);
 
   // Initialize the vairables.
-  computeMcZMPArea(2.0);
+  updateMcZMPArea(2.0);
 
   std::cout << "McZMPArea is created." << std::endl;
 }
+
+
 template<typename Point>
-void McZMPArea<Point>::computeMcZMPArea(double height)
+void McZMPArea<Point>::updateMcZMPArea(double height)
+{
+
+  // Update the contacts (the grasp matrices will be updated):
+  contactsPtr_ ->update(getRobot());
+ 
+  // Update the Multi-contact ZMP area:
+  computeMcZMPArea_(height);
+}
+
+template<typename Point>
+void McZMPArea<Point>::computeMcZMPArea_(double height)
 {
   assert(getContactSet()->getContactMap().size() > 0);
   int numContact = static_cast<int>(getContactSet()->getContactMap().size());
@@ -68,12 +81,12 @@ void McZMPArea<Point>::computeMcZMPArea(double height)
   int count = 0;
   for(auto & contactPair : getContactSet()->getContactMap())
   {
-    Eigen::Matrix6d tempGraspMatrix;
+    //Eigen::Matrix6d tempGraspMatrix;
     // contactPair.second.calcGeometricGraspMatrix(tempGraspMatrix, getRobot()); // Gives the same result.
-    contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
+    //contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
 
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
-        contactPair.second.contactWrenchCone() * tempGraspMatrix;
+        contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
 
     G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
     count++;
