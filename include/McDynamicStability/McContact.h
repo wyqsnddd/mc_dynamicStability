@@ -63,7 +63,7 @@ public:
 
   /*! \brief returns the vertices of the contact area in the INERTIAL frame.
    */
-  const std::vector<Eigen::Vector3d> & getContactAreaVerticies() const
+  const std::vector<Eigen::Vector3d> & getContactAreaVertices() const
   {
     return inertialContactAreaVertices_;
   }
@@ -71,7 +71,7 @@ public:
   /*! \brief returns the vertices of the surface in the INERTIAL frame.
    * If the planar contact is not idea, we assume that the surface area is smaller than the contact area.
    */
-  const std::vector<Eigen::Vector3d> & getSurfaceVerticies() const
+  const std::vector<Eigen::Vector3d> & getSurfaceVertices() const
   {
     return inertialSurfaceVertices_;
   }
