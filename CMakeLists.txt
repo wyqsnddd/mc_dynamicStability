@@ -16,6 +16,7 @@ setup_project()
 
 find_package(mc_rtc REQUIRED)
 find_package(Stabiliplus REQUIRED)
+find_package(Qhull 7.3.2 REQUIRED)
 
 add_required_dependency(nlopt)
 

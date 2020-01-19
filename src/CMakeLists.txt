@@ -6,16 +6,14 @@ set(mc_zmp_area_src
 
 add_library(${PROJECT_NAME} SHARED ${mc_zmp_area_src})
 
-target_link_libraries(${PROJECT_NAME} mc_rtc::mc_control)
-target_link_libraries(${PROJECT_NAME} eigen-lssol::eigen-lssol)
-target_link_libraries(${PROJECT_NAME} Stabiliplus::StabilityPolytope)
-target_link_libraries(${PROJECT_NAME} Stabiliplus::ProblemDescriptor)
-target_link_libraries(${PROJECT_NAME} Stabiliplus::wrappers)
-target_link_libraries(${PROJECT_NAME} qhullcpp qhullstatic_r)
-
-pkg_config_use_dependency(${PROJECT_NAME} nlopt)
-
-include(GNUInstallDirs)
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_control)
+target_link_libraries(${PROJECT_NAME} PUBLIC eigen-lssol::eigen-lssol)
+target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::StabilityPolytope)
+target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::ProblemDescriptor)
+target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::wrappers)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qhull::qhullcpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC nlopt)
 
 install(
     DIRECTORY ${CMAKE_SOURCE_DIR}/include/
