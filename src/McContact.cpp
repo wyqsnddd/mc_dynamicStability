@@ -140,7 +140,7 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   // (0) Update the contact area points: 
   for (const auto & point : getLocalContactAreaVerticies_())
   {
-    inertialContactAreaVertices_.emplace_back(X_0_s.rotation()*point + X_0_s.translation()); 
+    inertialContactAreaVertices_.emplace_back(X_0_s.rotation().inverse() * point + X_0_s.translation());
   }
 
 
