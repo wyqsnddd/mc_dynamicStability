@@ -56,7 +56,7 @@ public:
 
   /*! It needs to be updated in each iteration.
    * \param  height of the surface where the ZMP is projected. The default value is 0.0.  */
-  //void computeMcZMPArea(double height);
+  // void computeMcZMPArea(double height);
   void updateMcZMPArea(double height);
 
   /*! Obtain a reference to the robot.
@@ -98,9 +98,8 @@ public:
 
   inline const std::shared_ptr<StaticStabilityPolytope> getProjector()
   {
-    return polytopeProjectorPtr_; 
+    return polytopeProjectorPtr_;
   }
-
 
 private:
   const mc_rbdyn::Robot & robot_;

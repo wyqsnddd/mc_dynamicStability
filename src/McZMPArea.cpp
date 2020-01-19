@@ -39,14 +39,13 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
   std::cout << "McZMPArea is created." << std::endl;
 }
 
-
 template<typename Point>
 void McZMPArea<Point>::updateMcZMPArea(double height)
 {
 
   // Update the contacts (the grasp matrices will be updated):
-  contactsPtr_ ->update(getRobot());
- 
+  contactsPtr_->update(getRobot());
+
   // Update the Multi-contact ZMP area:
   computeMcZMPArea_(height);
 }
@@ -81,9 +80,9 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
   int count = 0;
   for(auto & contactPair : getContactSet()->getContactMap())
   {
-    //Eigen::Matrix6d tempGraspMatrix;
+    // Eigen::Matrix6d tempGraspMatrix;
     // contactPair.second.calcGeometricGraspMatrix(tempGraspMatrix, getRobot()); // Gives the same result.
-    //contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
+    // contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
 
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
         contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
@@ -156,7 +155,6 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
    1.12270935e+00;
 
    */
-    
 
   // These lines are added to limit the maximum search range.
   pdPtr_->getF().bottomRightCorner(4, 2)(0, 0) = 1.0;

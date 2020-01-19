@@ -5,8 +5,8 @@ namespace mc_impact
 
 McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot) : mcContactParams_(inputParams)
 {
-  // Initialize the local contact points with a square: 
-  
+  // Initialize the local contact points with a square:
+
   localContactAreaVertices_.emplace_back(getContactParams().halfX, getContactParams().halfY, 0.0);
   localContactAreaVertices_.emplace_back(getContactParams().halfX, -getContactParams().halfY, 0.0);
   localContactAreaVertices_.emplace_back(-getContactParams().halfX, -getContactParams().halfY, 0.0);
@@ -14,15 +14,14 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
 
   initializeCWC_();
 
-  #ifdef DEBUG
-    std::cout<<cyan<<"Creating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
-  #endif
+#ifdef DEBUG
+  std::cout << cyan << "Creating contact: " << getContactParams().surfaceName << reset << std::endl;
+#endif
 
   update(robot);
-
 }
 
-void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot) 
+void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
 {
 
   graspMatrix_.setIdentity();
@@ -57,7 +56,7 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
 */
 }
 
-void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot) 
+void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot)
 {
   sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
 
