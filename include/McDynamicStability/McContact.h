@@ -55,21 +55,28 @@ public:
 
   /*! \brief desired CoP in the contact surface frame, e.g. LeftFoot or RightFoot.
   */
-  inline const Eigen::Vector2d & desiredCop()
+  inline const Eigen::Vector3d & desiredCop()
   {
     return desiredCoP_;
   }
 
-  /*! \brief returns the vertices in the inertial frame.
+  /*! \brief returns the vertices of the contact area in the INERTIAL frame.
    */
-  const std::vector<Eigen::Vector3d> & getContactAreaVerticies()
+  const std::vector<Eigen::Vector3d> & getContactAreaVerticies() const
   {
     return inertialContactAreaVertices_;
   }
 
-  /*! \brief MeasuredCoP in the contact surface frame, e.g. LeftFoot or RightFoot.
+  /*! \brief returns the vertices of the surface in the INERTIAL frame.
+   * If the planar contact is not idea, we assume that the surface area is smaller than the contact area.
+   */
+  const std::vector<Eigen::Vector3d> & getSurfaceVerticies() const
+  {
+    return inertialSurfaceVertices_;
+  }
+  /*! \brief MeasuredCoP of the contact surface frame, e.g. LeftFoot or RightFoot, in the INERTIAL frame.
   */
-  inline const Eigen::Vector2d & measuredCop()
+  inline const Eigen::Vector3d & measuredCop()
   {
     return measuredCoP_;
   }
@@ -86,12 +93,12 @@ private:
   McContactParams mcContactParams_;
 
   sva::ForceVecd desiredWrench_= sva::ForceVecd::Zero(); ///< Desired wrench in the body frame, e.g. l/r_sole ;
-  Eigen::Vector2d desiredCoP_ = Eigen::Vector2d::Zero(); ///< Desired CoP in the contact surface frame, e.g. LeftFoot or RightFoot.
-  Eigen::Vector2d measuredCoP_= Eigen::Vector2d::Zero(); ///< MeasuredCoP in the contact surface frame, e.g. LeftFoot or RightFoot.
+  Eigen::Vector3d desiredCoP_ = Eigen::Vector3d::Zero(); ///< Desired CoP in the contact surface frame, e.g. LeftFoot or RightFoot.
+  Eigen::Vector3d measuredCoP_= Eigen::Vector3d::Zero(); ///< MeasuredCoP in the contact surface frame, e.g. LeftFoot or RightFoot.
   Eigen::MatrixXd CWC_; ///< Contact wrench cone in the local contact frame, e.g. l/r_sole ;
 
 
-  void updateContactAreaVerticies_(const mc_rbdyn::Robot & robot);
+  void updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot);
 
   inline const std::vector<Eigen::Vector3d> & getLocalContactAreaVerticies_() const
   {
@@ -100,12 +107,13 @@ private:
   std::vector<Eigen::Vector3d> localContactAreaVertices_;
 
   std::vector<Eigen::Vector3d> inertialContactAreaVertices_;
+  std::vector<Eigen::Vector3d> inertialSurfaceVertices_;
 
 
   /*! \brief Update the measured CoP in each iteration according to the input measured Wrench. 
    * \param input Wrench. 
   */
-  void updateCoP_(const sva::ForceVecd & inputWrench);
+  //void updateCoP_(const mc_rbdyn::Robot & robot);
 
     /*
    * \brief calculate the grasp matrix w.r.t. the inertial frame

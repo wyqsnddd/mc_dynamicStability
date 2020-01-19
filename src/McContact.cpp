@@ -9,12 +9,15 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
   
   localContactAreaVertices_.emplace_back(getContactParams().halfX, getContactParams().halfY, 0.0);
   localContactAreaVertices_.emplace_back(getContactParams().halfX, -getContactParams().halfY, 0.0);
-  localContactAreaVertices_.emplace_back(-getContactParams().halfX, getContactParams().halfY, 0.0);
   localContactAreaVertices_.emplace_back(-getContactParams().halfX, -getContactParams().halfY, 0.0);
+  localContactAreaVertices_.emplace_back(-getContactParams().halfX, getContactParams().halfY, 0.0);
 
   initializeCWC_();
 
-  std::cout<<red<<"Creating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
+  #ifdef DEBUG
+    std::cout<<cyan<<"Creating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
+  #endif
+
   update(robot);
 
 }
@@ -127,7 +130,7 @@ void McContact::initializeCWC_()
 
 }
 
-void McContact::updateContactAreaVerticies_(const mc_rbdyn::Robot & robot)
+void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 {
 
   inertialContactAreaVertices_.clear();
@@ -135,26 +138,47 @@ void McContact::updateContactAreaVerticies_(const mc_rbdyn::Robot & robot)
   
   const sva::PTransformd & X_0_s = robot.surfacePose(getContactParams().surfaceName);
 
+  // (0) Update the contact area points: 
   for (const auto & point : getLocalContactAreaVerticies_())
   {
     inertialContactAreaVertices_.emplace_back(X_0_s.rotation()*point + X_0_s.translation()); 
   }
 
-}
 
-void McContact::updateCoP_(const sva::ForceVecd & inputWrench)
-{
+  // (1) Update the surface points: 
+  
+  std::vector<Eigen::Vector3d> points;
+  //const auto & surface = const_cast<mc_rbdyn::Surface &>(*contact.r1Surface());
+  const auto & surface = robot.surface(getContactParams().surfaceName);
+    // Points in body frame
+  const auto & pts = surface.points();
+  const sva::PTransformd & X_0_b = robot.bodyPosW(surface.bodyName());
+
+  std::cout<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
+  std::cout<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
+
+  for(const auto & p : pts)
+  {
+    sva::PTransformd X_0_p = p * X_0_b;
+    points.push_back(X_0_p.translation());
+    std::cout<<green<<"point: "<<X_0_p.translation().transpose()<<reset<<std::endl;
+  }
+
+  // (2) Update the CoP 
+  auto inputWrench= robot.forceSensor(getContactParams().sensorName).wrench();
   //std::cerr<<red<<"Void update of contact CoP "<<reset<<std::endl;
-  if(inputWrench.force().z() < 10.0) 
+  
+  measuredCoP_.setZero();
+  if(inputWrench.force().z() > 10.0) 
   {
     // Don't calculate the CoP when the contact is not set. 
-    measuredCoP_.setZero();
+    measuredCoP_.x() = -inputWrench.couple().y() / inputWrench.force().z();
+    measuredCoP_.y() = -inputWrench.couple().x() / inputWrench.force().z();
   }
-  else
-  {
-   measuredCoP_.x() = -inputWrench.couple().y() / inputWrench.force().z();
-   measuredCoP_.y() = -inputWrench.couple().x() / inputWrench.force().z();
-  }
+
+   // Transform the CoP from the local frame to the surface frame.
+
+  measuredCoP_ = X_0_s.rotation()*measuredCoP_ + X_0_s.translation();
  }
 
 void McContact::update(const mc_rbdyn::Robot & robot)
@@ -165,12 +189,12 @@ void McContact::update(const mc_rbdyn::Robot & robot)
 
   // (2) Update the vertices 
   // In the future we may use GEOS to create more complex contact area. 
-  updateContactAreaVerticies_(robot);
+  updateContactAreaVerticiesAndCoP_(robot);
 
 
   //  (3) Update the CoP
-  auto wrench = robot.forceSensor(getContactParams().sensorName).wrench();
-  updateCoP_(wrench);
+  //auto wrench = robot.forceSensor(getContactParams().sensorName).wrench();
+  //updateCoP_(wrench);
   
     
 }
