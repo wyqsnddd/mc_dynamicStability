@@ -12,7 +12,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC eigen-lssol::eigen-lssol)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::StabilityPolytope)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::ProblemDescriptor)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::wrappers)
-target_link_libraries(${PROJECT_NAME} PUBLIC Qhull::qhullcpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qhull::qhullcpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC nlopt)
 
 install(

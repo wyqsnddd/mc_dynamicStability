@@ -20,7 +20,6 @@ find_package(Qhull 7.3.2 REQUIRED)
 
 add_required_dependency(nlopt)
 
-include_directories(include)
 add_subdirectory(src)
 
 setup_project_finalize()
