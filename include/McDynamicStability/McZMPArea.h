@@ -61,18 +61,18 @@ public:
 
   /*! Obtain a reference to the robot.
    */
-  inline const mc_rbdyn::Robot & getRobot()
+  inline const mc_rbdyn::Robot & getRobot() const
   {
     return robot_;
   }
 
   ///< Get pointer to the set of contacts.
-  inline std::shared_ptr<McContactSet> getContactSet()
+  inline std::shared_ptr<McContactSet> getContactSet() const
   {
     return contactsPtr_;
   }
 
-  inline const IeqConstraintBlocks & getIeqConstraint()
+  inline const IeqConstraintBlocks & getIeqConstraint() const
   {
     return ieqConstraintBlocks_;
   }
@@ -87,7 +87,7 @@ public:
     // Each iteration should generate a new vetex.
     return polytopeProjectorPtr_->getMaxIteration();
   }
-  inline const std::vector<Eigen::Vector2d> & getPolygonVertices()
+  inline const std::vector<Eigen::Vector2d> & getPolygonVertices() const
   {
     return polygonVertices_;
   }
@@ -96,7 +96,7 @@ public:
     return McZMPAreaParams_;
   }
 
-  inline const std::shared_ptr<StaticStabilityPolytope> getProjector()
+  inline const std::shared_ptr<StaticStabilityPolytope> getProjector() const
   {
     return polytopeProjectorPtr_;
   }

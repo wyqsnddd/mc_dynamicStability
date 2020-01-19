@@ -198,8 +198,7 @@ void McContact::update(const mc_rbdyn::Robot & robot)
     
 }
 
-
-const McContact & McContactSet::getContact(const std::string & name)
+const McContact & McContactSet::getContact(const std::string & name) const
 {
   auto opt = contacts_.find(name);
   if(opt != (contacts_.end()))

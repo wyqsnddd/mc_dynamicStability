@@ -141,7 +141,7 @@ public:
   ~McContactSet() {}
   /*! Obtain a reference to the contact.
    */
-  const McContact & getContact(const std::string & name);
+  const McContact & getContact(const std::string & name) const;
 
   bool addContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot);
 
