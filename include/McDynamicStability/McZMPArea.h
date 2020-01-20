@@ -27,6 +27,7 @@ struct McZMPAreaParams
   double convergeThreshold = 0.01;
   bool useLIPMAssumptions = true;
   bool debug = false;
+  bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
 };
 
 template<typename Point>

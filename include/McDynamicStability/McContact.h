@@ -44,6 +44,8 @@ public:
     return mcContactParams_;
   }
 
+  /*! \brief get the contact-wrench cone in the local contact frame.
+   */
   inline const Eigen::MatrixXd & contactWrenchCone() const
   {
     return CWC_;
@@ -75,6 +77,8 @@ public:
   {
     return inertialSurfaceVertices_;
   }
+
+
   /*! \brief MeasuredCoP of the contact surface frame, e.g. LeftFoot or RightFoot, in the INERTIAL frame.
    */
   inline const Eigen::Vector3d & measuredCop()

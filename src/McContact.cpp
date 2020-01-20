@@ -35,6 +35,7 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
   
   auto rotation = X_0_c.rotation().transpose();
   auto translation =  - rotation*X_0_c.translation();
+  //auto translation =  X_0_c.translation();
 
   graspMatrix_.block<3, 3>(3, 0) = - rotation.transpose() * crossMatrix(translation);
 
@@ -65,15 +66,26 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
 
 void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot)
 {
+
+  // --------------- Use the dual-matrix as the 
   //sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
+  //graspMatrix_ = X_c_0.dualMatrix();
   
+  // ---------------
   sva::PTransformd X_0_c = robot.surfacePose(getContactParams().surfaceName);
+  graspMatrix_.setIdentity();
+  /* This is a manual calculation */
+  graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation();
+  graspMatrix_.block<3, 3>(3, 3) = graspMatrix_.block<3, 3>(0, 0);
 
-  graspMatrix_ = X_0_c.dualMatrix();
+  auto rotation = X_0_c.rotation().transpose();
+  //auto translation =  - rotation*X_0_c.translation();
+  auto translation =  X_0_c.translation();
 
-  graspMatrix_.block<3, 3>(3, 0) = graspMatrix_.block<3, 3>(0, 3);
+  graspMatrix_.block<3, 3>(0, 3) = - rotation.transpose() * crossMatrix(translation);
 
-  graspMatrix_.block<3, 3>(0, 3).setZero();
+
+
   // std::cout<<"The grasp matrix is: "<<std::endl<<G<<std::endl;
 }
 
@@ -89,9 +101,10 @@ void McContact::initializeCWC_()
   CWC_.setZero();
 
   // clang-format off
- // CWC_ <<
+  if(getContactParams().useSpatialVectorAlgebra)
+  {
+    CWC_ <<
       // mx,  my,  mz,  fx,  fy,            fz,
-      /*
           0,   0,   0, -1,    0,           -mu, 
 	  0,   0,   0, +1,    0,           -mu, 
 	  0,   0,   0,  0,   -1,           -mu, 
@@ -108,10 +121,9 @@ void McContact::initializeCWC_()
 	+mu, -mu,  +1, +Y,   -X, -(X + Y) * mu, 
 	-mu, +mu,  +1, -Y,   +X, -(X + Y) * mu, 
 	-mu, -mu,  +1, -Y,   -X, -(X + Y) * mu;
-	*/
-  // clang-format on 
-  
-  // clang-format off
+  }
+  else
+  {
   CWC_ <<
       //  fx,  fy,            fz,  mx,  my,  mz,  
          -1,    0,           -mu,   0,   0,   0, 
@@ -130,12 +142,9 @@ void McContact::initializeCWC_()
 	 +Y,   -X, -(X + Y) * mu, +mu, -mu,  +1, 
 	 -Y,   +X, -(X + Y) * mu, -mu, +mu,  +1, 
 	 -Y,   -X, -(X + Y) * mu, -mu, -mu,  +1;
+  }
   // clang-format on 
-
-
-
-
-
+  
 }
 
 void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
@@ -210,8 +219,14 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 void McContact::update(const mc_rbdyn::Robot & robot)
 {
   // (1) Update the GraspMatrix 
-  //calcGraspMatrix_(robot);
-  calcGeometricGraspMatrix_(robot);
+  if(getContactParams().useSpatialVectorAlgebra)
+  {
+    calcGraspMatrix_(robot);
+  }
+  else
+  {
+    calcGeometricGraspMatrix_(robot);
+  }
 
   // (2) Update the vertices 
   // In the future we may use GEOS to create more complex contact area. 

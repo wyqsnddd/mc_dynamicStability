@@ -193,8 +193,18 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
    */
 
   // This is the Matrix E:
-  pdPtr_->getA().block(assumptionSize, 0, 2, GM_SIZE * numContact) =
+  if (getParams().useSpatialVectorAlgebra)
+  {
+    pdPtr_->getA().block(assumptionSize, 0, 2, GM_SIZE * numContact) =
+      (height - getRobot().com().z()) / (mass * 9.81) * G.block(3, 0, 2, GM_SIZE * numContact);
+
+  }
+  else
+  {
+    pdPtr_->getA().block(assumptionSize, 0, 2, GM_SIZE * numContact) =
       (height - getRobot().com().z()) / (mass * 9.81) * G.block(0, 0, 2, GM_SIZE * numContact);
+  }
+  // Move the varialbes to the same side:  
   pdPtr_->getA().block<2, 2>(assumptionSize, GM_SIZE * numContact) = -Eigen::Matrix2d::Identity();
 
   // This is the Vector f:
@@ -639,14 +649,28 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
 
 template<typename Point>
 void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & inputG)
-{
+{ 
+	
+  // Set the vector d:
   pdPtr_->getB().head<3>() = getRobot().com();
 
+  // Calculate matrix C:
   Eigen::Matrix3d crossUz = crossMatrix(Eigen::Vector3d::UnitZ());
 
   Eigen::MatrixXd B;
   B.resize(4, 6);
   B.setZero();
+  if(getParams().useSpatialVectorAlgebra)
+  {
+  B.block<3, 3>(0, 3).setIdentity();
+  B.block<3, 3>(0, 3) *= getRobot().com().z();
+  B.block<3, 3>(0, 0) = crossUz;
+
+  B.block<1, 3>(3, 3) = -(crossUz * getRobot().com()).transpose();
+  B.block<1, 3>(3, 0) = Eigen::Vector3d::UnitZ().transpose();
+  }
+  else
+  {
   B.block<3, 3>(0, 0).setIdentity();
   B.block<3, 3>(0, 0) *= getRobot().com().z();
   B.block<3, 3>(0, 3) = crossUz;
@@ -654,8 +678,9 @@ void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::Matri
   
   B.block<1, 3>(3, 0) = -(crossUz * getRobot().com()).transpose();
   B.block<1, 3>(3, 3) = Eigen::Vector3d::UnitZ().transpose();
-  
-  // Matrix C:
+  }
+ 
+  // the same for both cases:
   pdPtr_->getA().block(0, 0, 4, GM_SIZE * numContact) = 1.0 / (getRobot().mass() * 9.81) * (B * inputG);
 
   if(getParams().debug)
