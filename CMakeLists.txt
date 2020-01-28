@@ -18,10 +18,7 @@ find_package(mc_rtc REQUIRED)
 find_package(Stabiliplus REQUIRED)
 find_package(Qhull 7.3.2 REQUIRED)
 
-add_required_dependency(nlopt)
-
 add_subdirectory(src)
 
 setup_project_finalize()
 setup_project_package_finalize()
-

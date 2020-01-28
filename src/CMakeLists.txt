@@ -13,7 +13,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::StabilityPolytope)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::ProblemDescriptor)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::wrappers)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qhull::qhullcpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC nlopt)
 
 install(
     DIRECTORY ${CMAKE_SOURCE_DIR}/include/
