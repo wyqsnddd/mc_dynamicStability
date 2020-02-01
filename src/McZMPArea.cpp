@@ -36,7 +36,7 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
   // Initialize the vairables.
   updateMcZMPArea(2.0);
 
-  std::cout << "McZMPArea is created." << std::endl;
+  std::cout << red<<"McZMPArea is created." << reset<< std::endl;
 }
 
 template<typename Point>
@@ -63,6 +63,7 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
   G.resize(GM_SIZE, GM_SIZE * numContact);
   G.setZero();
 
+  ///-------------Part One: Multi-contact wrench cone CW <= 0
   // Polytope:
   // Eigen::MatrixXd F; ///< Inequality constraint of the Halfspace representation of the polytope
   // Eigen::VectorXd b;
@@ -88,6 +89,7 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
         contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
 
     G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
+    //G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE)= contactPair.second.getGraspMatrix();
     count++;
   }
 
@@ -165,7 +167,7 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
   pdPtr_->getf().tail(4).setOnes();
   pdPtr_->getf().tail(4) = pdPtr_->getf().tail(4) * 100000;
 
-  ///-------------Part: Equality constraint: C X = d
+  ///-------------Part Two: Equality constraint: C X = d
 
   int assumptionSize = 4;
   // Update the matrices according to the LIPM assumptions:
@@ -187,7 +189,7 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
     updateLIPMAssumptions_(numContact, G);
   }
 
-  ///-------------Part: Projection E X = f
+  ///-------------Part Three: Projection E X = f
   /*
    * The equality constraints that specify the projection: polytope -> polygon (on the surface).
    */
@@ -594,6 +596,7 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
 
   */
 
+  ///-------------Part Four: projection 
   polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, getParams().iterationLimit,
                                                                     getParams().convergeThreshold, GLPK);
 

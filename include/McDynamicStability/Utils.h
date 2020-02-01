@@ -25,6 +25,13 @@ const std::string magenta("\033[0;35m");
 const std::string reset("\033[0m");
 #endif
 
+struct IeqConstraintBlocks
+{
+  Eigen::MatrixXd G_zmp;
+  Eigen::VectorXd h_zmp;
+};
+
+
 struct ZMPArea
 {
   double min_x;

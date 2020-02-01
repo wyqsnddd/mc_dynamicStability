@@ -34,8 +34,8 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
   //graspMatrix_.block<3, 3>(3, 0) = -graspMatrix_.block<3, 3>(0, 0) * crossMatrix(X_0_c.translation());
   
   auto rotation = X_0_c.rotation().transpose();
-  auto translation =  - rotation*X_0_c.translation();
-  //auto translation =  X_0_c.translation();
+  //auto translation =  - rotation*X_0_c.translation();
+  auto translation =  X_0_c.translation();
 
   graspMatrix_.block<3, 3>(3, 0) = - rotation.transpose() * crossMatrix(translation);
 
@@ -163,6 +163,15 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   //auto translation = - rotation * X_0_s.translation();
   auto translation = X_0_s.translation();
 
+  std::cerr<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
+  std::cerr<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
+
+  std::cerr<<yellow<<"Rotation: "<<std::endl<<rotation<<reset<<std::endl;
+  std::cerr<<yellow<<"Translation: "<<std::endl<<translation.transpose()<<reset<<std::endl;
+
+  Eigen::Quaterniond q(rotation);
+  std::cerr<<yellow<<"Quaternion: "<<q.coeffs().transpose()<<reset<<std::endl;
+
   // We use the points that is used for the CWC wrench cone. 
   for (const auto & point : getLocalContactAreaVerticies_())
   //for (const auto & point : pts)
@@ -187,9 +196,7 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
     // Points in body frame
   //const auto & pts = surface.points();
   const sva::PTransformd & X_0_b = robot.bodyPosW(surface.bodyName());
-
-  std::cout<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
-  std::cout<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
+  
 
   for(const auto & p : pts)
   {

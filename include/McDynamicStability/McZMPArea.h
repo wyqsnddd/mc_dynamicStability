@@ -15,11 +15,6 @@
 namespace mc_impact
 {
 
-struct IeqConstraintBlocks
-{
-  Eigen::MatrixXd G_zmp;
-  Eigen::VectorXd h_zmp;
-};
 
 struct McZMPAreaParams
 {

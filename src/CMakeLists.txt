@@ -1,6 +1,7 @@
 set(mc_zmp_area_src
   McContact.cpp
   McZMPArea.cpp
+  McComArea.cpp
   Utils.cpp
 )
 
