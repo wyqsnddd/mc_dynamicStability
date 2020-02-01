@@ -27,17 +27,17 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
   graspMatrix_.setIdentity();
   auto X_0_c = robot.surfacePose(getContactParams().surfaceName);
 
-  //graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
+  // graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
   graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation();
   graspMatrix_.block<3, 3>(3, 3) = graspMatrix_.block<3, 3>(0, 0);
 
-  //graspMatrix_.block<3, 3>(3, 0) = -graspMatrix_.block<3, 3>(0, 0) * crossMatrix(X_0_c.translation());
-  
-  auto rotation = X_0_c.rotation().transpose();
-  //auto translation =  - rotation*X_0_c.translation();
-  auto translation =  X_0_c.translation();
+  // graspMatrix_.block<3, 3>(3, 0) = -graspMatrix_.block<3, 3>(0, 0) * crossMatrix(X_0_c.translation());
 
-  graspMatrix_.block<3, 3>(3, 0) = - rotation.transpose() * crossMatrix(translation);
+  auto rotation = X_0_c.rotation().transpose();
+  // auto translation =  - rotation*X_0_c.translation();
+  auto translation = X_0_c.translation();
+
+  graspMatrix_.block<3, 3>(3, 0) = -rotation.transpose() * crossMatrix(translation);
 
   /*
   G<<
@@ -67,10 +67,10 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
 void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot)
 {
 
-  // --------------- Use the dual-matrix as the 
-  //sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
-  //graspMatrix_ = X_c_0.dualMatrix();
-  
+  // --------------- Use the dual-matrix as the
+  // sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
+  // graspMatrix_ = X_c_0.dualMatrix();
+
   // ---------------
   sva::PTransformd X_0_c = robot.surfacePose(getContactParams().surfaceName);
   graspMatrix_.setIdentity();
@@ -79,20 +79,18 @@ void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot)
   graspMatrix_.block<3, 3>(3, 3) = graspMatrix_.block<3, 3>(0, 0);
 
   auto rotation = X_0_c.rotation().transpose();
-  //auto translation =  - rotation*X_0_c.translation();
-  auto translation =  X_0_c.translation();
+  // auto translation =  - rotation*X_0_c.translation();
+  auto translation = X_0_c.translation();
 
-  graspMatrix_.block<3, 3>(0, 3) = - rotation.transpose() * crossMatrix(translation);
-
-
+  graspMatrix_.block<3, 3>(0, 3) = -rotation.transpose() * crossMatrix(translation);
 
   // std::cout<<"The grasp matrix is: "<<std::endl<<G<<std::endl;
 }
 
 void McContact::initializeCWC_()
 {
-  double X = 2*getContactParams().halfX;
-  double Y = 2*getContactParams().halfY;
+  double X = 2 * getContactParams().halfX;
+  double Y = 2 * getContactParams().halfY;
 
   // Inner approximation
   double mu = getContactParams().frictionCoe / sqrt(2.0);

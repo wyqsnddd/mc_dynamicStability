@@ -2,7 +2,8 @@
 
 #include "McDynamicStability/Utils.h"
 
-namespace mc_impact{
+namespace mc_impact
+{
 // Repeat static constexpr declarations
 // See also https://stackoverflow.com/q/8016780
 constexpr double McComArea::LOWER_SLOPE;
@@ -14,11 +15,10 @@ constexpr int McComArea::GM_SIZE;
 constexpr int McComArea::RM_SIZE;
 
 McComArea::McComArea(const mc_rbdyn::Robot & robot,
-                            std::shared_ptr<McContactSet> contactSetPtr,
-                            const McComAreaParams & McComAreaParams)
+                     std::shared_ptr<McContactSet> contactSetPtr,
+                     const McComAreaParams & McComAreaParams)
 : robot_(robot), contactsPtr_(contactSetPtr), McComAreaParams_(McComAreaParams)
 {
- 
 
   pdPtr_.reset(new McPolytopeDescriptor());
 
@@ -31,7 +31,7 @@ McComArea::McComArea(const mc_rbdyn::Robot & robot,
   // Initialize the vairables.
   updateMcComArea();
 
-  std::cout << red<<"McComArea is created." << reset<< std::endl;
+  std::cout << red << "McComArea is created." << reset << std::endl;
 }
 
 void McComArea::updateMcComArea()
@@ -56,7 +56,6 @@ void McComArea::computeMcComArea_()
   Eigen::MatrixXd G;
   G.resize(GM_SIZE, GM_SIZE * numContact);
   G.setZero();
-
 
   // 1.1 We use this pair of matrix and vector to specify the MCWC constraint
   pdPtr_->getF().resize(numContact * rowCWC + 4, numContact * colCWC + 2);
@@ -84,12 +83,11 @@ void McComArea::computeMcComArea_()
   pdPtr_->getf().tail(4).setOnes();
   pdPtr_->getf().tail(4) = pdPtr_->getf().tail(4) * 100000;
 
-
   ///-------------Part Two: Equality constraint: C X = d
   int assumptionSize = 4;
   // Update the matrices according to the LIPM assumptions:
-  /* (1) Sum of the external forces = -mg 
-   * (2) n dot torque = 0 
+  /* (1) Sum of the external forces = -mg
+   * (2) n dot torque = 0
    */
   if(!getParams().useLIPMAssumptions)
   {
@@ -109,11 +107,11 @@ void McComArea::computeMcComArea_()
   ///-------------Part Three: Projection E X = f
   /*
    * The equality constraints that specify the projection: polytope -> polygon (on the surface).
-   * n \times torque = 0 
+   * n \times torque = 0
    */
 
   // This is the Matrix E:
-  
+
   Eigen::Matrix3d crossUz = crossMatrix(Eigen::Vector3d::UnitZ());
   // clang-format off
   pdPtr_->getA().block(assumptionSize, 0, 2, GM_SIZE * numContact) =

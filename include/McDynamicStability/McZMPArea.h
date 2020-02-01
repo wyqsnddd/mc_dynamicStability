@@ -15,7 +15,6 @@
 namespace mc_impact
 {
 
-
 struct McZMPAreaParams
 {
   unsigned iterationLimit = 50;

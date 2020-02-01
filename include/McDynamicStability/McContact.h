@@ -78,7 +78,6 @@ public:
     return inertialSurfaceVertices_;
   }
 
-
   /*! \brief MeasuredCoP of the contact surface frame, e.g. LeftFoot or RightFoot, in the INERTIAL frame.
    */
   inline const Eigen::Vector3d & measuredCop()

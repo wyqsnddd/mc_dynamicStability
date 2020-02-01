@@ -31,7 +31,6 @@ struct IeqConstraintBlocks
   Eigen::VectorXd h_zmp;
 };
 
-
 struct ZMPArea
 {
   double min_x;

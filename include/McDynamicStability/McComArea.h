@@ -1,6 +1,7 @@
-# pragma once  
+#pragma once
 
-# include <mc_rbdyn/Robots.h>
+#include <mc_rbdyn/Robots.h>
+
 #include "McDynamicStability/McContact.h"
 #include "McDynamicStability/McPolytopeDescriptor.h"
 #include <Eigen/Dense>
@@ -23,9 +24,9 @@ struct McComAreaParams
 };
 
 class McComArea
-/*! \brief This is an c++ implementation to calculate the 'multi-contact Com static equilibrium area' 
+/*! \brief This is an c++ implementation to calculate the 'multi-contact Com static equilibrium area'
  *  1. We use  the "Ray-shooting-method" by `Bretl and Lall's algorithm`.
- *  2. NOT yet following any example. We ony use the equations on the paper. 
+ *  2. NOT yet following any example. We ony use the equations on the paper.
  *  3. Returns (*) verticies of the `multi-contact-com-area`.
  */
 {
@@ -38,13 +39,13 @@ class McComArea
   ///< Size of the Rotation Matrix.
   static constexpr int RM_SIZE = 3;
 
-public: 
+public:
   McComArea(const mc_rbdyn::Robot & robot,
             std::shared_ptr<McContactSet> contactSetPtr,
             const McComAreaParams & mcZMPAreaParams);
   ~McComArea() {}
 
- /*! It needs to be updated in each iteration.
+  /*! It needs to be updated in each iteration.
    * \param  height of the surface where the ZMP is projected. The default value is 0.0.  */
   // void computeMcZMPArea(double height);
   void updateMcComArea();
@@ -61,12 +62,12 @@ public:
     return contactsPtr_;
   }
 
- /*
-  inline const IeqConstraintBlocks & getIeqConstraint() const
-  {
-    return ieqConstraintBlocks_;
-  }
-  */
+  /*
+   inline const IeqConstraintBlocks & getIeqConstraint() const
+   {
+     return ieqConstraintBlocks_;
+   }
+   */
   inline int getNumVertex() const
   {
     return static_cast<int>(polygonVertices_.size());
@@ -78,7 +79,7 @@ public:
   }
 
   /*! \brief Return vertices of the Com static equilibrium polytope
-   * 
+   *
    */
   inline const std::vector<Eigen::Vector2d> & getPolygonVertices() const
   {
@@ -93,6 +94,7 @@ public:
   {
     return polytopeProjectorPtr_;
   }
+
 private:
   const mc_rbdyn::Robot & robot_;
 
@@ -107,10 +109,8 @@ private:
 
   McComAreaParams McComAreaParams_;
 
-  //IeqConstraintBlocks ieqConstraintBlocks_;
+  // IeqConstraintBlocks ieqConstraintBlocks_;
 
   std::vector<Eigen::Vector2d> polygonVertices_;
-
-
 };
-}
+} // namespace mc_impact
