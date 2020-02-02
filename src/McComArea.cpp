@@ -149,6 +149,19 @@ void McComArea::computeMcComArea_()
     std::cerr<< red<< "End of StabiliPlus verticies." << reset<<std::endl;
 
   }
+
+  polygonVertices_ = polytopeProjectorPtr_->getInnerVertices();
+
+  removeDuplicates(polygonVertices_);
+  if(getParams().debug)
+  {
+    std::cerr << cyan << "The projected Com-area vertices are: " << reset << std::endl;
+    for(auto & point : polygonVertices_)
+    {
+      std::cerr << point.transpose() << std::endl;
+    }
+    std::cerr << "--------------------------------" << std::endl;
+  }
 }
 
 
@@ -173,4 +186,4 @@ void McComArea::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & i
   }
 
 }
-};
+}

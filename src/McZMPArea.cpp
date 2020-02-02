@@ -858,7 +858,7 @@ std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
 
   if(getParams().debug)
   {
-    std::cerr << cyan << "The projected vertices are: " << reset << std::endl;
+    std::cerr << green << "The projected ZMP-area vertices are: " << reset << std::endl;
     for(auto & point : polygonVertices_)
     {
       std::cerr << point.transpose() << std::endl;
