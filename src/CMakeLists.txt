@@ -1,3 +1,5 @@
+set(VERSION_SCRIPT_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/version-script.lds")
+
 set(mc_zmp_area_src
   McContact.cpp
   McZMPArea.cpp
@@ -12,7 +14,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC eigen-lssol::eigen-lssol)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::StabilityPolytope)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::ProblemDescriptor)
 target_link_libraries(${PROJECT_NAME} PUBLIC Stabiliplus::wrappers)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qhull::qhullcpp)
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/3rd-party/qhull/src")
+target_link_libraries(${PROJECT_NAME} PRIVATE qhullcpp qhullstatic_r)
+add_version_script(${PROJECT_NAME} "${VERSION_SCRIPT_LOCATION}")
 
 install(TARGETS ${PROJECT_NAME} 
   EXPORT "${TARGETS_EXPORT_NAME}"
