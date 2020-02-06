@@ -2,15 +2,11 @@
 
 #include <Eigen/Dense>
 #include <iostream>
-#include <libqhullcpp/Qhull.h>
 #include <memory>
-//#include <libqhullcpp/QhullFacetList.h>
-#include <libqhullcpp/QhullPoints.h>
-//#include <libqhullcpp/QhullVertexSet.h>
+#include <vector>
 
 #include <cmath>
 #include <unordered_set>
-//# include <boost/container_hash/hash.hpp>
 
 namespace mc_impact
 {

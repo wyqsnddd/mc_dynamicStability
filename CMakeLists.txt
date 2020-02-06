@@ -15,9 +15,11 @@ include(cmake/base.cmake)
 
 project(${PROJECT_NAME} LANGUAGES CXX VERSION ${PROJECT_VERSION})
 
+# qhull (build re-entrant static version)
+add_subdirectory(3rd-party/qhull)
+
 add_project_dependency(mc_rtc REQUIRED)
 add_project_dependency(eigen-lssol REQUIRED)
 add_project_dependency(Stabiliplus REQUIRED)
-add_project_dependency(Qhull 7.3.2 REQUIRED)
 
 add_subdirectory(src)
