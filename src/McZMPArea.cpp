@@ -86,11 +86,16 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
     // contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
 
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
-        contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
+        //contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
+        contactPair.second.contactWrenchConeInertialFrame(); 
 
-    G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
-    // G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE)= contactPair.second.getGraspMatrix();
+    //G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
+    // G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = contactPair.second.getGraspMatrix();
+    
+    G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = contactPair.second.getResultantWrenchMultiplier();
+
     count++;
+
   }
 
   //  hard-coded matrices when there are leftFoot and rightHand contacts:
