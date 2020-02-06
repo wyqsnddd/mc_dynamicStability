@@ -14,6 +14,8 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
 
   initializeCWC_();
 
+  resultantWrenchMultiplier_.setIdentity();
+
 #ifdef DEBUG
   std::cout << cyan << "Creating contact: " << getContactParams().surfaceName << reset << std::endl;
 #endif
@@ -98,6 +100,9 @@ void McContact::initializeCWC_()
   CWC_.resize(16, 6);
   CWC_.setZero();
 
+  CWCInertial_.resize(16, 6);
+  CWCInertial_.setZero();
+
   // clang-format off
   if(getContactParams().useSpatialVectorAlgebra)
   {
@@ -143,6 +148,8 @@ void McContact::initializeCWC_()
   }
   // clang-format on 
   
+  CWCInertial_ = CWC_;
+
 }
 
 void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
@@ -219,6 +226,20 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 
   //measuredCoP_ = X_0_s.rotation().transpose()*measuredCoP_ + X_0_s.translation();
   measuredCoP_ = rotation*measuredCoP_ + translation;
+
+
+  // (3) Update the Contact Wrench Cone (CWC) and the resultant wrench multiplier
+  Eigen::Matrix6d rotationCorrection;
+  rotationCorrection.setIdentity();
+
+
+  rotationCorrection.block<3,3>(0,0) = rotation;
+  rotationCorrection.block<3,3>(3,3) = rotation;
+
+  CWCInertial_ = CWC_*rotationCorrection;
+
+  resultantWrenchMultiplier_.block<3, 3>(3, 0) = - crossMatrix(translation);
+
  }
 
 void McContact::update(const mc_rbdyn::Robot & robot)
