@@ -37,6 +37,7 @@ McComArea::McComArea(const mc_rbdyn::Robot & robot,
 void McComArea::updateMcComArea()
 {
 
+  std::cerr<< red<< "Updating McComArea." << reset<<std::endl;
   // Update the contacts (the grasp matrices will be updated):
   contactsPtr_->update(getRobot());
 
@@ -47,6 +48,8 @@ void McComArea::updateMcComArea()
 void McComArea::computeMcComArea_()
 {
   assert(getContactSet()->getContactMap().size() > 0);
+
+  std::cerr<< red<< "Computing McComArea." << reset<<std::endl;
 
   int numContact = static_cast<int>(getContactSet()->getContactMap().size());
   int rowCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().rows());
@@ -68,8 +71,11 @@ void McComArea::computeMcComArea_()
   for(auto & contactPair : getContactSet()->getContactMap())
   {
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
-        contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
-    G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
+        //contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
+        contactPair.second.contactWrenchConeInertialFrame();
+    //G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
+    G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = contactPair.second.getResultantWrenchMultiplier();
+        
 
     count++;
   }
@@ -103,7 +109,7 @@ void McComArea::computeMcComArea_()
   {
     updateLIPMAssumptions_(numContact, G);
   }
-
+  
   ///-------------Part Three: Projection E X = f
   /*
    * The equality constraints that specify the projection: polytope -> polygon (on the surface).
@@ -126,7 +132,14 @@ void McComArea::computeMcComArea_()
 
   // This is the Vector f:
   //pdPtr_->getB().tail<2>() << 0.0, 0.0;
+  if(getParams().debug)
+  {
+    std::cerr<< red<<"The equality constraint rhs is: " <<reset<< std::endl<<
+	     pdPtr_->getB()<< std::endl;
+    std::cerr<< red<<"The equality constraint lhs is: " <<reset<< std::endl<<
 
+	     pdPtr_->getA()<< std::endl;
+  }
 
   ///-------------Part Four: projection 
   polytopeProjectorPtr_ = std::make_shared<StaticStabilityPolytope>(pdPtr_, getParams().iterationLimit, getParams().convergeThreshold, GLPK);
@@ -169,7 +182,7 @@ void McComArea::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & i
 {
 
   // Set the vector d:
-  pdPtr_->getB()(3) = - getRobot().mass()*9.81;
+  pdPtr_->getB()(2) = getRobot().mass()*9.81;
 
   Eigen::MatrixXd B;
   B.resize(4, 6);

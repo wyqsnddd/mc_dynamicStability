@@ -42,7 +42,7 @@ class McComArea
 public:
   McComArea(const mc_rbdyn::Robot & robot,
             std::shared_ptr<McContactSet> contactSetPtr,
-            const McComAreaParams & mcZMPAreaParams);
+            const McComAreaParams & mcComAreaParams);
   ~McComArea() {}
 
   /*! It needs to be updated in each iteration.

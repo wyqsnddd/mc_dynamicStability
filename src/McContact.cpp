@@ -168,6 +168,9 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   //auto translation = - rotation * X_0_s.translation();
   auto translation = X_0_s.translation();
 
+
+
+
   std::cerr<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
   std::cerr<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
 
@@ -227,23 +230,14 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   //measuredCoP_ = X_0_s.rotation().transpose()*measuredCoP_ + X_0_s.translation();
   measuredCoP_ = rotation*measuredCoP_ + translation;
 
-
-  // (3) Update the Contact Wrench Cone (CWC) and the resultant wrench multiplier
-  Eigen::Matrix6d rotationCorrection;
-  rotationCorrection.setIdentity();
-
-
-  rotationCorrection.block<3,3>(0,0) = rotation;
-  rotationCorrection.block<3,3>(3,3) = rotation;
-
-  CWCInertial_ = CWC_*rotationCorrection;
-
-  resultantWrenchMultiplier_.block<3, 3>(3, 0) = - crossMatrix(translation);
-
  }
 
 void McContact::update(const mc_rbdyn::Robot & robot)
 {
+
+  // (0) Update the CWC in the inertial frame 
+  updateCWCInertial_(robot);
+
   // (1) Update the GraspMatrix 
   if(getContactParams().useSpatialVectorAlgebra)
   {
@@ -259,11 +253,32 @@ void McContact::update(const mc_rbdyn::Robot & robot)
   updateContactAreaVerticiesAndCoP_(robot);
 
 
-  //  (3) Update the CoP
-  //auto wrench = robot.forceSensor(getContactParams().sensorName).wrench();
-  //updateCoP_(wrench);
-  
     
+  // 
+}
+
+void McContact::updateCWCInertial_(const mc_rbdyn::Robot & robot)
+{
+
+  const sva::PTransformd & X_0_s = robot.surfacePose(getContactParams().surfaceName);
+
+  auto rotationTranspose = X_0_s.rotation();
+  auto translation = X_0_s.translation();
+
+  // Update the Contact Wrench Cone (CWC) and the resultant wrench multiplier
+  Eigen::Matrix6d rotationCorrection;
+  rotationCorrection.setIdentity();
+
+
+  rotationCorrection.block<3,3>(0,0) = rotationTranspose;
+  rotationCorrection.block<3,3>(3,3) = rotationTranspose;
+
+  CWCInertial_ = CWC_*rotationCorrection;
+
+  resultantWrenchMultiplier_.setIdentity();
+  resultantWrenchMultiplier_.block<3, 3>(3, 0) = crossMatrix(translation);
+
+
 }
 
 const McContact & McContactSet::getContact(const std::string & name) const

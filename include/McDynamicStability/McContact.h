@@ -122,6 +122,8 @@ private:
 
   void updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot);
 
+  void updateCWCInertial_(const mc_rbdyn::Robot & robot);
+
   inline const std::vector<Eigen::Vector3d> & getLocalContactAreaVerticies_() const
   {
     return localContactAreaVertices_;
