@@ -44,9 +44,18 @@ public:
     return mcContactParams_;
   }
 
+  /*! \brief get the contact-wrench cone in the local contact frame.
+   */
   inline const Eigen::MatrixXd & contactWrenchCone() const
   {
     return CWC_;
+  }
+
+  /*! \brief get the contact-wrench cone in the inertial contact frame.
+   */
+  inline const Eigen::MatrixXd & contactWrenchConeInertialFrame() const
+  {
+    return CWCInertial_; 
   }
 
   inline const sva::ForceVecd & desiredWrench()
@@ -75,6 +84,7 @@ public:
   {
     return inertialSurfaceVertices_;
   }
+
   /*! \brief MeasuredCoP of the contact surface frame, e.g. LeftFoot or RightFoot, in the INERTIAL frame.
    */
   inline const Eigen::Vector3d & measuredCop()
@@ -82,6 +92,13 @@ public:
     return measuredCoP_;
   }
 
+  /*! \brief Wrench*Multiplier gives the resultant wrench at the origin of the intertial frame
+   */
+  inline const Eigen::Matrix6d & getResultantWrenchMultiplier() const
+  {
+    return resultantWrenchMultiplier_; 
+  }
+  
   inline const Eigen::Matrix6d & getGraspMatrix() const
   {
     return graspMatrix_;
@@ -100,8 +117,12 @@ private:
   Eigen::Vector3d measuredCoP_ =
       Eigen::Vector3d::Zero(); ///< MeasuredCoP in the contact surface frame, e.g. LeftFoot or RightFoot.
   Eigen::MatrixXd CWC_; ///< Contact wrench cone in the local contact frame, e.g. l/r_sole ;
+  Eigen::MatrixXd CWCInertial_; ///< Contact wrench cone in the inertial contact frame, i.e. the robot inertial frame: X_0.
+  Eigen::Matrix6d resultantWrenchMultiplier_; ///< Wrench*Multiplier gives the resultant wrench at the origin of the intertial frame
 
   void updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot);
+
+  void updateCWCInertial_(const mc_rbdyn::Robot & robot);
 
   inline const std::vector<Eigen::Vector3d> & getLocalContactAreaVerticies_() const
   {

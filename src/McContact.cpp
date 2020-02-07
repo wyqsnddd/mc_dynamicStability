@@ -14,6 +14,8 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
 
   initializeCWC_();
 
+  resultantWrenchMultiplier_.setIdentity();
+
 #ifdef DEBUG
   std::cout << cyan << "Creating contact: " << getContactParams().surfaceName << reset << std::endl;
 #endif
@@ -27,16 +29,17 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
   graspMatrix_.setIdentity();
   auto X_0_c = robot.surfacePose(getContactParams().surfaceName);
 
-  //graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
+  // graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
   graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation();
   graspMatrix_.block<3, 3>(3, 3) = graspMatrix_.block<3, 3>(0, 0);
 
-  //graspMatrix_.block<3, 3>(3, 0) = -graspMatrix_.block<3, 3>(0, 0) * crossMatrix(X_0_c.translation());
-  
-  auto rotation = X_0_c.rotation().transpose();
-  auto translation =  - rotation*X_0_c.translation();
+  // graspMatrix_.block<3, 3>(3, 0) = -graspMatrix_.block<3, 3>(0, 0) * crossMatrix(X_0_c.translation());
 
-  graspMatrix_.block<3, 3>(3, 0) = - rotation.transpose() * crossMatrix(translation);
+  auto rotation = X_0_c.rotation().transpose();
+  // auto translation =  - rotation*X_0_c.translation();
+  auto translation = X_0_c.translation();
+
+  graspMatrix_.block<3, 3>(3, 0) = -rotation.transpose() * crossMatrix(translation);
 
   /*
   G<<
@@ -65,22 +68,31 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
 
 void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot)
 {
-  //sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
-  
+
+  // --------------- Use the dual-matrix as the
+  // sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
+  // graspMatrix_ = X_c_0.dualMatrix();
+
+  // ---------------
   sva::PTransformd X_0_c = robot.surfacePose(getContactParams().surfaceName);
+  graspMatrix_.setIdentity();
+  /* This is a manual calculation */
+  graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation();
+  graspMatrix_.block<3, 3>(3, 3) = graspMatrix_.block<3, 3>(0, 0);
 
-  graspMatrix_ = X_0_c.dualMatrix();
+  auto rotation = X_0_c.rotation().transpose();
+  // auto translation =  - rotation*X_0_c.translation();
+  auto translation = X_0_c.translation();
 
-  graspMatrix_.block<3, 3>(3, 0) = graspMatrix_.block<3, 3>(0, 3);
+  graspMatrix_.block<3, 3>(0, 3) = -rotation.transpose() * crossMatrix(translation);
 
-  graspMatrix_.block<3, 3>(0, 3).setZero();
   // std::cout<<"The grasp matrix is: "<<std::endl<<G<<std::endl;
 }
 
 void McContact::initializeCWC_()
 {
-  double X = 2*getContactParams().halfX;
-  double Y = 2*getContactParams().halfY;
+  double X = 2 * getContactParams().halfX;
+  double Y = 2 * getContactParams().halfY;
 
   // Inner approximation
   double mu = getContactParams().frictionCoe / sqrt(2.0);
@@ -88,10 +100,14 @@ void McContact::initializeCWC_()
   CWC_.resize(16, 6);
   CWC_.setZero();
 
+  CWCInertial_.resize(16, 6);
+  CWCInertial_.setZero();
+
   // clang-format off
- // CWC_ <<
+  if(getContactParams().useSpatialVectorAlgebra)
+  {
+    CWC_ <<
       // mx,  my,  mz,  fx,  fy,            fz,
-      /*
           0,   0,   0, -1,    0,           -mu, 
 	  0,   0,   0, +1,    0,           -mu, 
 	  0,   0,   0,  0,   -1,           -mu, 
@@ -108,10 +124,9 @@ void McContact::initializeCWC_()
 	+mu, -mu,  +1, +Y,   -X, -(X + Y) * mu, 
 	-mu, +mu,  +1, -Y,   +X, -(X + Y) * mu, 
 	-mu, -mu,  +1, -Y,   -X, -(X + Y) * mu;
-	*/
-  // clang-format on 
-  
-  // clang-format off
+  }
+  else
+  {
   CWC_ <<
       //  fx,  fy,            fz,  mx,  my,  mz,  
          -1,    0,           -mu,   0,   0,   0, 
@@ -130,11 +145,10 @@ void McContact::initializeCWC_()
 	 +Y,   -X, -(X + Y) * mu, +mu, -mu,  +1, 
 	 -Y,   +X, -(X + Y) * mu, -mu, +mu,  +1, 
 	 -Y,   -X, -(X + Y) * mu, -mu, -mu,  +1;
+  }
   // clang-format on 
-
-
-
-
+  
+  CWCInertial_ = CWC_;
 
 }
 
@@ -153,6 +167,18 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   auto rotation = X_0_s.rotation().inverse();
   //auto translation = - rotation * X_0_s.translation();
   auto translation = X_0_s.translation();
+
+
+
+
+  std::cerr<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
+  std::cerr<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
+
+  std::cerr<<yellow<<"Rotation: "<<std::endl<<rotation<<reset<<std::endl;
+  std::cerr<<yellow<<"Translation: "<<std::endl<<translation.transpose()<<reset<<std::endl;
+
+  Eigen::Quaterniond q(rotation);
+  std::cerr<<yellow<<"Quaternion: "<<q.coeffs().transpose()<<reset<<std::endl;
 
   // We use the points that is used for the CWC wrench cone. 
   for (const auto & point : getLocalContactAreaVerticies_())
@@ -178,9 +204,7 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
     // Points in body frame
   //const auto & pts = surface.points();
   const sva::PTransformd & X_0_b = robot.bodyPosW(surface.bodyName());
-
-  std::cout<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
-  std::cout<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
+  
 
   for(const auto & p : pts)
   {
@@ -205,24 +229,56 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 
   //measuredCoP_ = X_0_s.rotation().transpose()*measuredCoP_ + X_0_s.translation();
   measuredCoP_ = rotation*measuredCoP_ + translation;
+
  }
 
 void McContact::update(const mc_rbdyn::Robot & robot)
 {
+
+  // (0) Update the CWC in the inertial frame 
+  updateCWCInertial_(robot);
+
   // (1) Update the GraspMatrix 
-  //calcGraspMatrix_(robot);
-  calcGeometricGraspMatrix_(robot);
+  if(getContactParams().useSpatialVectorAlgebra)
+  {
+    calcGraspMatrix_(robot);
+  }
+  else
+  {
+    calcGeometricGraspMatrix_(robot);
+  }
 
   // (2) Update the vertices 
   // In the future we may use GEOS to create more complex contact area. 
   updateContactAreaVerticiesAndCoP_(robot);
 
 
-  //  (3) Update the CoP
-  //auto wrench = robot.forceSensor(getContactParams().sensorName).wrench();
-  //updateCoP_(wrench);
-  
     
+  // 
+}
+
+void McContact::updateCWCInertial_(const mc_rbdyn::Robot & robot)
+{
+
+  const sva::PTransformd & X_0_s = robot.surfacePose(getContactParams().surfaceName);
+
+  auto rotationTranspose = X_0_s.rotation();
+  auto translation = X_0_s.translation();
+
+  // Update the Contact Wrench Cone (CWC) and the resultant wrench multiplier
+  Eigen::Matrix6d rotationCorrection;
+  rotationCorrection.setIdentity();
+
+
+  rotationCorrection.block<3,3>(0,0) = rotationTranspose;
+  rotationCorrection.block<3,3>(3,3) = rotationTranspose;
+
+  CWCInertial_ = CWC_*rotationCorrection;
+
+  resultantWrenchMultiplier_.setIdentity();
+  resultantWrenchMultiplier_.block<3, 3>(3, 0) = crossMatrix(translation);
+
+
 }
 
 const McContact & McContactSet::getContact(const std::string & name) const

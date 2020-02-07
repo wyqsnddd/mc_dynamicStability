@@ -2,15 +2,11 @@
 
 #include <Eigen/Dense>
 #include <iostream>
-#include <libqhullcpp/Qhull.h>
 #include <memory>
-//#include <libqhullcpp/QhullFacetList.h>
-#include <libqhullcpp/QhullPoints.h>
-//#include <libqhullcpp/QhullVertexSet.h>
+#include <vector>
 
 #include <cmath>
 #include <unordered_set>
-//# include <boost/container_hash/hash.hpp>
 
 namespace mc_impact
 {
@@ -24,6 +20,12 @@ const std::string cyan("\033[0;36m");
 const std::string magenta("\033[0;35m");
 const std::string reset("\033[0m");
 #endif
+
+struct IeqConstraintBlocks
+{
+  Eigen::MatrixXd G_zmp;
+  Eigen::VectorXd h_zmp;
+};
 
 struct ZMPArea
 {

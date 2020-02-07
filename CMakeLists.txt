@@ -1,27 +1,25 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.1)
 
-project(mc_dynamicStability VERSION 0.0.0)
-
-set(PROJECT_URL https://gite.lirmm.fr/jrl-collaborators/mc_zmp_area)
 set(PROJECT_NAME mc_dynamicStability)
+set(PROJECT_VERSION 0.1.0)
 set(PROJECT_DESCRIPTION "Calculate the multi-contact ZMP area.")
-
-
-include(cmake/base.cmake)
+set(PROJECT_URL https://gite.lirmm.fr/mc-controllers/mc_dynamicStability)
+set(PROJECT_USE_CMAKE_EXPORT TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 set(CXX_DISABLE_WERROR 1)
 set(CMAKE_CXX_STANDARD 11)
-setup_project()
+set(PROJECT_DEBUG_POSTFIX "_d")
+set(DOXYGEN_USE_MATHJAX "YES")
 
-find_package(mc_rtc REQUIRED)
-find_package(Stabiliplus REQUIRED)
-find_package(Qhull 7.3.2 REQUIRED)
+include(cmake/base.cmake)
 
-add_required_dependency(nlopt)
+project(${PROJECT_NAME} LANGUAGES CXX VERSION ${PROJECT_VERSION})
+
+# qhull (build re-entrant static version)
+add_subdirectory(3rd-party/qhull)
+
+add_project_dependency(mc_rtc REQUIRED)
+add_project_dependency(eigen-lssol REQUIRED)
+add_project_dependency(Stabiliplus REQUIRED)
 
 add_subdirectory(src)
-
-setup_project_finalize()
-setup_project_package_finalize()
-

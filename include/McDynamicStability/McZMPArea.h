@@ -15,18 +15,13 @@
 namespace mc_impact
 {
 
-struct IeqConstraintBlocks
-{
-  Eigen::MatrixXd G_zmp;
-  Eigen::VectorXd h_zmp;
-};
-
 struct McZMPAreaParams
 {
   unsigned iterationLimit = 50;
   double convergeThreshold = 0.01;
   bool useLIPMAssumptions = true;
   bool debug = false;
+  bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
 };
 
 template<typename Point>
