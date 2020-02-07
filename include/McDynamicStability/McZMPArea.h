@@ -18,6 +18,7 @@ namespace mc_impact
 struct McZMPAreaParams
 {
   unsigned iterationLimit = 50;
+  double projectionRadius = 10.0;
   double convergeThreshold = 0.01;
   bool useLIPMAssumptions = true;
   bool debug = false;

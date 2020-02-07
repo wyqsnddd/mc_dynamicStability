@@ -87,7 +87,7 @@ void McComArea::computeMcComArea_()
   pdPtr_->getF().bottomRightCorner(4, 2)(3, 1) = -1.0;
 
   pdPtr_->getf().tail(4).setOnes();
-  pdPtr_->getf().tail(4) = pdPtr_->getf().tail(4) * 100000;
+  pdPtr_->getf().tail(4) = pdPtr_->getf().tail(4) * getParams().projectionRadius;
 
   ///-------------Part Two: Equality constraint: C X = d
   int assumptionSize = 4;
