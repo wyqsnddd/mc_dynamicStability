@@ -36,8 +36,10 @@ McComArea::McComArea(const mc_rbdyn::Robot & robot,
 
 void McComArea::updateMcComArea()
 {
-
-  std::cerr<< red<< "Updating McComArea." << reset<<std::endl;
+  if(getParams().debug)
+  {
+    std::cerr<< red<< "Updating McComArea." << reset<<std::endl;
+  }
   // Update the contacts (the grasp matrices will be updated):
   contactsPtr_->update(getRobot());
 
@@ -48,9 +50,10 @@ void McComArea::updateMcComArea()
 void McComArea::computeMcComArea_()
 {
   assert(getContactSet()->getContactMap().size() > 0);
-
-  std::cerr<< red<< "Computing McComArea." << reset<<std::endl;
-
+  if(getParams().debug)
+  {
+    std::cerr<< red<< "Computing McComArea." << reset<<std::endl;
+  }
   int numContact = static_cast<int>(getContactSet()->getContactMap().size());
   int rowCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().rows());
   int colCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().cols());

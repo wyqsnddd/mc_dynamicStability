@@ -171,6 +171,7 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 
 
 
+  /*
   std::cerr<<red<<"Updating contact: "<<getContactParams().surfaceName<<reset<<std::endl;
   std::cerr<<cyan<<"The surface: "<<surface.name()<<" has bodyName: "<<surface.bodyName()<<reset<<std::endl;
 
@@ -179,6 +180,7 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 
   Eigen::Quaterniond q(rotation);
   std::cerr<<yellow<<"Quaternion: "<<q.coeffs().transpose()<<reset<<std::endl;
+  */
 
   // We use the points that is used for the CWC wrench cone. 
   for (const auto & point : getLocalContactAreaVerticies_())
