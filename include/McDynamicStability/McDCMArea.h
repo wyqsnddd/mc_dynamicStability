@@ -12,8 +12,8 @@
 #include <math.h>
 #include <polytope/staticStabilityPolytope.h>
 
-#include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/GeometryFactory.h>
+#include <geos/version.h>
+
 #include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/LinearRing.h>
