@@ -31,6 +31,8 @@ McComArea::McComArea(const mc_rbdyn::Robot & robot,
   // Initialize the vairables.
   updateMcComArea();
 
+  centroid_.setZero();
+
   std::cout << red << "McComArea is created." << reset << std::endl;
 }
 
@@ -169,6 +171,7 @@ void McComArea::computeMcComArea_()
   polygonVertices_ = polytopeProjectorPtr_->getInnerVertices();
 
   removeDuplicates(polygonVertices_);
+
   if(getParams().debug)
   {
     std::cerr << cyan << "The projected Com-area vertices are: " << reset << std::endl;
@@ -178,8 +181,38 @@ void McComArea::computeMcComArea_()
     }
     std::cerr << "--------------------------------" << std::endl;
   }
-}
 
+  calcCentroid_();
+
+}
+void McComArea::calcCentroid_()
+{
+  const geos::geom::GeometryFactory * factory_ptr = geos::geom::GeometryFactory::getDefaultInstance();
+  const geos::geom::GeometryFactory & factory = *factory_ptr;
+
+  auto comPoints2dseq = factory.getCoordinateSequenceFactory()->create(static_cast<size_t>(0), 0);
+  std::vector<geos::geom::Coordinate> comPoints;
+  comPoints.clear();
+  for(const auto  & p : getPolygonVertices())
+  {
+     comPoints.push_back(geos::geom::Coordinate(p.x(), p.y()));
+  }
+  comPoints.push_back(geos::geom::Coordinate(comPoints[0]));
+  comPoints2dseq->setPoints(comPoints);
+  auto comPoints2dshell = factory.createLinearRing(std::move(comPoints2dseq));
+#if GEOS_VERSION_MAJOR >= 3 && GEOS_VERSION_MINOR >= 8
+  auto comSurfPoly = factory.createPolygon(std::move(comPoints2dshell));
+#else
+  auto comSurfPoly = factory.createPolygon(std::move(comPoints2dshell), nullptr);
+#endif
+  auto comhull = comSurfPoly->convexHull();
+  auto c = comhull->getCentroid();
+
+  centroid_.x() = c->getX(); 
+  centroid_.y() = c->getY(); 
+  centroid_.z() = 0.0; 
+
+}
 
 void McComArea::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & inputG)
 {

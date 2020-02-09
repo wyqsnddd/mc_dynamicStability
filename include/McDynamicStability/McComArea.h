@@ -12,6 +12,15 @@
 #include <math.h>
 #include <polytope/staticStabilityPolytope.h>
 
+#include <geos/version.h>
+
+#include <geos/geom/CoordinateSequenceFactory.h>
+#include <geos/geom/GeometryFactory.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/Polygon.h>
+
+#include <geos/geom/Point.h>
+
 namespace mc_impact
 {
 
@@ -96,6 +105,14 @@ public:
     return polytopeProjectorPtr_;
   }
 
+  /*!
+   * \brief Get the centroid of the projected multi-contact com area. 
+   */
+  inline const Eigen::Vector3d getCentroid()const
+  {
+    return centroid_; 
+  }
+
 private:
   const mc_rbdyn::Robot & robot_;
 
@@ -113,5 +130,8 @@ private:
   // IeqConstraintBlocks ieqConstraintBlocks_;
 
   std::vector<Eigen::Vector2d> polygonVertices_;
+
+  void calcCentroid_();
+  Eigen::Vector3d centroid_;
 };
 } // namespace mc_impact

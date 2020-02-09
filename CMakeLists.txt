@@ -12,10 +12,10 @@ set(DOXYGEN_USE_MATHJAX "YES")
 
 include(cmake/base.cmake)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(${PROJECT_NAME} LANGUAGES CXX VERSION ${PROJECT_VERSION})
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # qhull (build re-entrant static version)
 add_subdirectory(3rd-party/qhull)
 
