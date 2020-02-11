@@ -33,6 +33,9 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
   polygonVertices_.emplace_back(0.15, -0.12);
   polygonVertices_.emplace_back(0.15, 0.12);
 
+  //bipedalZMP_.setZero();
+  mcZMP_.setZero();
+
   // Initialize the vairables.
   updateMcZMPArea(2.0);
 
@@ -858,8 +861,7 @@ std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
 
   removeDuplicates(polygonVertices_);
   // std::cerr<< "The filtered vertices are: " << std::endl;
-  pointsToInequalityMatrix<Point>(polygonVertices_, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, LOWER_SLOPE,
-                                  UPPER_SLOPE);
+  pointsToInequalityMatrix<Point>(polygonVertices_, ieqConstraintBlocks_.G, ieqConstraintBlocks_.h, LOWER_SLOPE, UPPER_SLOPE);
 
   if(getParams().debug)
   {
@@ -871,6 +873,101 @@ std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
     std::cerr << "--------------------------------" << std::endl;
   }
 }
+
+template<typename Point>
+Eigen::Vector3d McZMPArea<Point>::zmpCalculation(const Eigen::Vector3d & groundNormal, const sva::ForceVecd inputWrench) const
+{
+
+  Eigen::Matrix3d crossGroundNormal  = crossMatrix(groundNormal);
+
+  double denominator = groundNormal.dot(inputWrench.force());
+
+  return (crossGroundNormal*inputWrench.couple())*(1.0/denominator);
+}
+
+template<typename Point>
+void McZMPArea<Point>::updateBipedalZMP_()
+{
+
+// Read the wrenches for the multi-contact phase.
+   sva::ForceVecd forceSum;
+   forceSum.force() = Eigen::Vector3d::Zero();
+   forceSum.couple() = Eigen::Vector3d::Zero();
+
+   auto leftFootContact = getContactSet()->getContact("LeftFoot");
+   auto rightFootContact = getContactSet()->getContact("RightFoot");
+
+
+   sva::PTransformd X_lSole_0 = getRobot().bodyPosW(leftFootContact.getContactParams().bodyName).inv();
+   sva::ForceVecd fl_sensor = getRobot().bodyWrench(leftFootContact.getContactParams().bodyName);
+   sva::ForceVecd fl_0 = X_lSole_0.dualMul(fl_sensor);
+
+   forceSum += fl_0;
+
+   sva::PTransformd X_rSole_0 = getRobot().bodyPosW(rightFootContact.getContactParams().bodyName).inv();
+   sva::ForceVecd fr_sensor = getRobot().bodyWrench(rightFootContact.getContactParams().bodyName);
+   sva::ForceVecd fr_0 = X_rSole_0.dualMul(fr_sensor);
+
+   forceSum += fr_0;
+  
+  mcZMP_ =  zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
+
+}
+
+
+template<typename Point>
+void McZMPArea<Point>::updateMcZMP_()
+{
+
+// Read the wrenches for the multi-contact phase.
+   sva::ForceVecd forceSum;
+   forceSum.force() = Eigen::Vector3d::Zero();
+   forceSum.couple() = Eigen::Vector3d::Zero();
+
+  for(auto & contactPair : getContactSet()->getContactMap())
+  {
+     //std::string surfaceName = contactPair.second.getContactParams().surfaceName;
+     std::string bodyName = contactPair.second.getContactParams().bodyName;
+     sva::PTransformd X_ee_0 = getRobot().bodyPosW(bodyName).inv(); 
+
+     sva::ForceVecd wrench_sensor = getRobot().bodyWrench(bodyName);
+     sva::ForceVecd wrench_inertial = X_ee_0.dualMul(wrench_sensor);
+     forceSum += wrench_inertial;
+  }
+
+  Eigen::Vector3d groundNormal = Eigen::Vector3d::UnitZ();
+
+  Eigen::Matrix3d crossGroundNormal  = crossMatrix(groundNormal);
+
+  double denominator = groundNormal.dot(forceSum.force());
+
+  mcZMP_ =  (crossGroundNormal*forceSum.couple())*(1.0/denominator);
+
+}
+
+/*
+auto & robot = realRobots().robot();
+  sva::PTransformd X_rSole_0 = robot.bodyPosW("r_ankle").inv();
+  sva::PTransformd X_lSole_0 = robot.bodyPosW("l_ankle").inv();
+  sva::PTransformd X_ree_0 = robot.bodyPosW("r_wrist").inv();
+
+  // sva::ForceVecd fr_sensor = robot().forceSensor("RightFootForceSensor").wrench();
+  sva::ForceVecd fr_sensor = robot.bodyWrench("r_ankle");
+  sva::ForceVecd fr_0 = X_rSole_0.dualMul(fr_sensor);
+
+  // sva::ForceVecd fl_sensor = robot().forceSensor("LeftFootForceSensor").wrench();
+  sva::ForceVecd fl_sensor = robot.bodyWrench("l_ankle");
+  sva::ForceVecd fl_0 = X_lSole_0.dualMul(fl_sensor);
+
+  sva::ForceVecd free_sensor = robot.bodyWrench("r_wrist");
+  sva::ForceVecd free_0 = X_ree_0.dualMul(free_sensor);
+
+  double denominator = fr_0.force().z() + fl_0.force().z() + free_0.force().z();
+  zmp_.x() = -(fr_0.couple().y() + fl_0.couple().y() + free_0.couple().y()) / denominator;
+  zmp_.y() = (fr_0.couple().x() + fl_0.couple().x() + free_0.couple().x()) / denominator;
+  zmp_.z() = 0;
+
+*/
 
 template<typename Point>
 void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & inputG)

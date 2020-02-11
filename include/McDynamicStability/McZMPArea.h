@@ -97,6 +97,24 @@ public:
     return polytopeProjectorPtr_;
   }
 
+  /*! \brief Obtain the ZMP assuming multiple contacts.
+   */
+  const Eigen::Vector3d & getMcZMP() const
+  {
+    return mcZMP_;   
+  }
+
+  /*! \brief Obtain the ZMP assuming double feet support. 
+   */
+  
+  const Eigen::Vector3d & getBipedalZMP() const
+  {
+    return bipedalZMP_;   
+  }
+  
+
+  Eigen::Vector3d zmpCalculation(const Eigen::Vector3d & normal, const sva::ForceVecd Wrench)const;
+
 private:
   const mc_rbdyn::Robot & robot_;
 
@@ -114,6 +132,13 @@ private:
   void computeMcZMPArea_(double height);
 
   McZMPAreaParams McZMPAreaParams_;
+
+  Eigen::Vector3d mcZMP_;
+
+  Eigen::Vector3d bipedalZMP_;
+
+  void updateMcZMP_(); 
+  void updateBipedalZMP_(); 
 
   IeqConstraintBlocks ieqConstraintBlocks_;
 
