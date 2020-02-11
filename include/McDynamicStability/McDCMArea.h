@@ -30,6 +30,10 @@ class McDCMArea
 /*! \brief We calculate the `Multi-contact DCM-area` using the intersection of the `Multi-contat ZMP are` and the `Multi-contact Com static equilibrium` area
 */
 {
+  static constexpr double LOWER_SLOPE = 0.01;
+  static constexpr double UPPER_SLOPE = 100.0;
+
+
   public:   
    McDCMArea(std::shared_ptr<mc_impact::McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr,
                  std::shared_ptr<mc_impact::McComArea> mcComAreaPtr
@@ -49,9 +53,29 @@ class McDCMArea
     return polygonVertices_;
   }
 
+   /*! \return The possibly maximal amount of vertices of the multi-contact DCM area
+    */
+   inline int getMaxNumVertex() const
+  {
+    // We use the sum of the ZMP and Com area vertices. 
+    return (mcZMPAreaPtr_->getMaxNumVertex() + mcComAreaPtr_->getMaxNumVertex());  
+  }
+
+   /*! \return The amount of vertices of the multi-contact DCM area
+    */
+   inline int getNumVertex() const
+  {
+    return static_cast<int>(getPolygonVertices().size());
+  }
+   inline const IeqConstraintBlocks & getIeqConstraint() const
+  {
+    return ieqConstraintBlocks_;
+  }
   private:
   std::shared_ptr<McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr_;
   std::shared_ptr<McComArea> mcComAreaPtr_;
+
+  IeqConstraintBlocks ieqConstraintBlocks_;
 
   std::vector<Eigen::Vector2d> polygonVertices_;
 };

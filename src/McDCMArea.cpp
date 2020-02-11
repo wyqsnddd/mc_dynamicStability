@@ -2,6 +2,12 @@
 
 namespace mc_impact
 {
+ constexpr double McDCMArea::LOWER_SLOPE;
+
+ constexpr double McDCMArea::UPPER_SLOPE;
+
+
+
   McDCMArea::McDCMArea(std::shared_ptr<mc_impact::McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr,
                  std::shared_ptr<mc_impact::McComArea> mcComAreaPtr):mcZMPAreaPtr_(mcZMPAreaPtr), mcComAreaPtr_(mcComAreaPtr)
   {
@@ -127,6 +133,9 @@ bool McDCMArea::updateMcDCMArea()
     }
     std::cerr << "--------------------------------" << std::endl;
   }
+ 
+  pointsToInequalityMatrix<Eigen::Vector2d>(polygonVertices_, ieqConstraintBlocks_.G, ieqConstraintBlocks_.h, LOWER_SLOPE, UPPER_SLOPE);
+
   return true; 
 }
 

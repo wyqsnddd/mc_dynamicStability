@@ -11,6 +11,7 @@
 namespace mc_impact
 {
 
+
 #ifndef COLOUR_PRINT
 #  define COLOUR_PRINT
 const std::string red("\033[0;31m");
@@ -23,8 +24,8 @@ const std::string reset("\033[0m");
 
 struct IeqConstraintBlocks
 {
-  Eigen::MatrixXd G_zmp;
-  Eigen::VectorXd h_zmp;
+  Eigen::MatrixXd G;
+  Eigen::VectorXd h;
 };
 
 struct ZMPArea
