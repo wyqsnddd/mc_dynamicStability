@@ -16,6 +16,12 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
 
   resultantWrenchMultiplier_.setIdentity();
 
+  if(getContactParams().initialContactStatus){
+     setContact();
+  } else {
+     breakContact(); 
+  }
+
 #ifdef DEBUG
   std::cout << cyan << "Creating contact: " << getContactParams().surfaceName << reset << std::endl;
 #endif

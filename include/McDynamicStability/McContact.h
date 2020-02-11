@@ -26,6 +26,7 @@ struct McContactParams
   int index = 0; ///< Index of the contact in the wrenchDistributionQP.
   bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
                                         ///< we represent wrench = [f, \tau].
+  bool initialContactStatus;
 };
 
 class McContact
@@ -108,6 +109,21 @@ public:
     return getContactParams().useSpatialVectorAlgebra;
   }
 
+  inline void breakContact() 
+  {
+    inContact_ = false; 
+  }
+  inline void setContact() 
+  {
+    inContact_ = true; 
+  }
+  /*! \return if the contact is set 
+   */
+  inline bool inContact() const
+  {
+     return inContact_; 
+  }
+
 private:
   McContactParams mcContactParams_;
 
@@ -153,6 +169,8 @@ private:
   void initializeCWC_();
 
   Eigen::Matrix6d graspMatrix_ = Eigen::Matrix6d::Identity();
+
+  bool inContact_ = false;
 };
 
 struct McContactSet
