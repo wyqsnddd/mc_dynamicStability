@@ -21,8 +21,8 @@ constexpr int McZMPArea<Point>::RM_SIZE;
 template<typename Point>
 McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
                             std::shared_ptr<McContactSet> contactSetPtr,
-                            const McZMPAreaParams & mcZMPAreaParams)
-: robot_(robot), contactsPtr_(contactSetPtr), McZMPAreaParams_(mcZMPAreaParams)
+                            const McProjectionParams & mcProjectionParams)
+: robot_(robot), contactsPtr_(contactSetPtr), mcProjectionParams_(mcProjectionParams)
 {
   // pdPtr_ = std::make_shared<McPolytopeDescriptor>();
   pdPtr_.reset(new McPolytopeDescriptor());

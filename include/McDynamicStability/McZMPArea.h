@@ -15,6 +15,7 @@
 namespace mc_impact
 {
 
+/*
 struct McZMPAreaParams
 {
   unsigned iterationLimit = 50;
@@ -24,7 +25,7 @@ struct McZMPAreaParams
   bool debug = false;
   bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
 };
-
+*/
 template<typename Point>
 class McZMPArea
 /*! \brief This is an c++ implementation of the multi-contact-ZMP-area calculation
@@ -47,7 +48,7 @@ class McZMPArea
 public:
   McZMPArea(const mc_rbdyn::Robot & robot,
             std::shared_ptr<McContactSet> contactSetPtr,
-            const McZMPAreaParams & mcZMPAreaParams);
+            const McProjectionParams & mcProjectionParams);
   ~McZMPArea() {}
 
   /*! It needs to be updated in each iteration.
@@ -87,9 +88,9 @@ public:
   {
     return polygonVertices_;
   }
-  const McZMPAreaParams & getParams() const
+  const McProjectionParams & getParams() const
   {
-    return McZMPAreaParams_;
+    return mcProjectionParams_;
   }
 
   inline const std::shared_ptr<StaticStabilityPolytope> getProjector() const
@@ -131,7 +132,7 @@ private:
 
   void computeMcZMPArea_(double height);
 
-  McZMPAreaParams McZMPAreaParams_;
+  McProjectionParams mcProjectionParams_;
 
   Eigen::Vector3d mcZMP_;
 

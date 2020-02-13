@@ -11,7 +11,6 @@
 namespace mc_impact
 {
 
-
 #ifndef COLOUR_PRINT
 #  define COLOUR_PRINT
 const std::string red("\033[0;31m");
@@ -21,6 +20,17 @@ const std::string cyan("\033[0;36m");
 const std::string magenta("\033[0;35m");
 const std::string reset("\033[0m");
 #endif
+
+struct McProjectionParams
+{
+  unsigned iterationLimit = 50;
+  double projectionRadius = 10.0;
+  double convergeThreshold = 0.01;
+  bool useLIPMAssumptions = true;
+  bool debug = false;
+  bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
+};
+
 
 struct IeqConstraintBlocks
 {

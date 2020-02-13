@@ -16,8 +16,8 @@ constexpr int McComArea::RM_SIZE;
 
 McComArea::McComArea(const mc_rbdyn::Robot & robot,
                      std::shared_ptr<McContactSet> contactSetPtr,
-                     const McComAreaParams & McComAreaParams)
-: robot_(robot), contactsPtr_(contactSetPtr), McComAreaParams_(McComAreaParams)
+                     const McProjectionParams & mcProjectionParams)
+: robot_(robot), contactsPtr_(contactSetPtr), mcProjectionParams_(mcProjectionParams)
 {
 
   pdPtr_.reset(new McPolytopeDescriptor());

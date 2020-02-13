@@ -24,6 +24,7 @@
 namespace mc_impact
 {
 
+	/*
 struct McComAreaParams
 {
   unsigned iterationLimit = 50;
@@ -33,6 +34,7 @@ struct McComAreaParams
   bool debug = false;
 };
 
+*/
 class McComArea
 /*! \brief This is an c++ implementation to calculate the 'multi-contact Com static equilibrium area'
  *  1. We use  the "Ray-shooting-method" by `Bretl and Lall's algorithm`.
@@ -52,7 +54,7 @@ class McComArea
 public:
   McComArea(const mc_rbdyn::Robot & robot,
             std::shared_ptr<McContactSet> contactSetPtr,
-            const McComAreaParams & mcComAreaParams);
+            const McProjectionParams & mcProjectionParams);
   ~McComArea() {}
 
   /*! It needs to be updated in each iteration.
@@ -95,9 +97,9 @@ public:
   {
     return polygonVertices_;
   }
-  const McComAreaParams & getParams() const
+  const McProjectionParams & getParams() const
   {
-    return McComAreaParams_;
+    return mcProjectionParams_;
   }
 
   inline const std::shared_ptr<StaticStabilityPolytope> getProjector() const
@@ -125,7 +127,7 @@ private:
   void updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & inputG);
   void computeMcComArea_();
 
-  McComAreaParams McComAreaParams_;
+  McProjectionParams mcProjectionParams_;
 
   // IeqConstraintBlocks ieqConstraintBlocks_;
 
