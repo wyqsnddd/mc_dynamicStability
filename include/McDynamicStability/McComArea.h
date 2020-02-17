@@ -87,7 +87,8 @@ public:
   inline int getMaxNumVertex() const
   {
     // Each iteration should generate a new vetex.
-    return polytopeProjectorPtr_->getMaxIteration();
+    //return polytopeProjectorPtr_->getMaxIteration();
+    return static_cast<int>(getParams().iterationLimit);
   }
 
   /*! \brief Return vertices of the Com static equilibrium polytope
@@ -113,6 +114,11 @@ public:
   inline const Eigen::Vector3d getCentroid()const
   {
     return centroid_; 
+  }
+
+  void print() const
+  {
+    std::cerr<<red<<"McComArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
   }
 
 private:

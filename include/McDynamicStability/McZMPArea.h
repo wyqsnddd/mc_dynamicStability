@@ -66,6 +66,8 @@ public:
   ///< Get pointer to the set of contacts.
   inline std::shared_ptr<McContactSet> getContactSet() const
   {
+    assert( contactsPtr_ != nullptr );
+
     return contactsPtr_;
   }
 
@@ -82,7 +84,8 @@ public:
   inline int getMaxNumVertex() const
   {
     // Each iteration should generate a new vetex.
-    return polytopeProjectorPtr_->getMaxIteration();
+    return getParams().iterationLimit;
+    //return polytopeProjectorPtr_->getMaxIteration();
   }
   inline const std::vector<Eigen::Vector2d> & getPolygonVertices() const
   {
@@ -95,7 +98,11 @@ public:
 
   inline const std::shared_ptr<StaticStabilityPolytope> getProjector() const
   {
-    return polytopeProjectorPtr_;
+    if(polytopeProjectorPtr_ == nullptr){
+       throw std::runtime_error("PolytopeProjector is asked without being allocated yet. ");
+    }else{
+       return polytopeProjectorPtr_;
+    }
   }
 
   /*! \brief Obtain the ZMP assuming multiple contacts.
@@ -114,7 +121,12 @@ public:
   }
   
 
-  Eigen::Vector3d zmpCalculation(const Eigen::Vector3d & normal, const sva::ForceVecd Wrench)const;
+  static Eigen::Vector3d zmpCalculation(const Eigen::Vector3d & normal, const sva::ForceVecd Wrench);
+
+void print() const
+  {
+    std::cerr<<red<<"McZMPArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
+  }
 
 private:
   const mc_rbdyn::Robot & robot_;

@@ -33,7 +33,7 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
   polygonVertices_.emplace_back(0.15, -0.12);
   polygonVertices_.emplace_back(0.15, 0.12);
 
-  //bipedalZMP_.setZero();
+  bipedalZMP_.setZero();
   mcZMP_.setZero();
 
   // Initialize the vairables.
@@ -45,6 +45,10 @@ McZMPArea<Point>::McZMPArea(const mc_rbdyn::Robot & robot,
 template<typename Point>
 void McZMPArea<Point>::updateMcZMPArea(double height)
 {
+
+  updateMcZMP_();
+
+  updateBipedalZMP_();
 
   // Update the contacts (the grasp matrices will be updated):
   contactsPtr_->update(getRobot());
@@ -874,8 +878,9 @@ std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
   }
 }
 
+// Static function 
 template<typename Point>
-Eigen::Vector3d McZMPArea<Point>::zmpCalculation(const Eigen::Vector3d & groundNormal, const sva::ForceVecd inputWrench) const
+Eigen::Vector3d McZMPArea<Point>::zmpCalculation(const Eigen::Vector3d & groundNormal, const sva::ForceVecd inputWrench) 
 {
 
   Eigen::Matrix3d crossGroundNormal  = crossMatrix(groundNormal);
@@ -889,6 +894,7 @@ template<typename Point>
 void McZMPArea<Point>::updateBipedalZMP_()
 {
 
+  assert(getContactSet()->getContactMap().size() > 0);
 // Read the wrenches for the multi-contact phase.
    sva::ForceVecd forceSum;
    forceSum.force() = Eigen::Vector3d::Zero();
@@ -910,7 +916,7 @@ void McZMPArea<Point>::updateBipedalZMP_()
 
    forceSum += fr_0;
   
-  mcZMP_ =  zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
+  bipedalZMP_ =  zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
 
 }
 
@@ -919,6 +925,7 @@ template<typename Point>
 void McZMPArea<Point>::updateMcZMP_()
 {
 
+  assert(getContactSet()->getContactMap().size() > 0);
 // Read the wrenches for the multi-contact phase.
    sva::ForceVecd forceSum;
    forceSum.force() = Eigen::Vector3d::Zero();
@@ -935,6 +942,10 @@ void McZMPArea<Point>::updateMcZMP_()
      forceSum += wrench_inertial;
   }
 
+
+  mcZMP_ =  zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
+
+  /*
   Eigen::Vector3d groundNormal = Eigen::Vector3d::UnitZ();
 
   Eigen::Matrix3d crossGroundNormal  = crossMatrix(groundNormal);
@@ -942,6 +953,7 @@ void McZMPArea<Point>::updateMcZMP_()
   double denominator = groundNormal.dot(forceSum.force());
 
   mcZMP_ =  (crossGroundNormal*forceSum.couple())*(1.0/denominator);
+  */
 
 }
 

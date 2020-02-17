@@ -71,7 +71,12 @@ class McDCMArea
   {
     return ieqConstraintBlocks_;
   }
+   void print() const
+  {
+    std::cerr<<red<<"McDCMArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
+  }
   private:
+
   std::shared_ptr<McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr_;
   std::shared_ptr<McComArea> mcComAreaPtr_;
 
