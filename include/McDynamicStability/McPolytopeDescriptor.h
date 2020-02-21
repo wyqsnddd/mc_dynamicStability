@@ -28,7 +28,7 @@ public:
 
   inline Eigen::VectorXd & getB()
   {
-    return m_B;
+    return m_b;
   }
   inline Eigen::MatrixXd & getF()
   {

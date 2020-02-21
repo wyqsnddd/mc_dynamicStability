@@ -1,5 +1,8 @@
 #include "McDynamicStability/Utils.h"
 
+#include <libqhullcpp/Qhull.h>
+#include <libqhullcpp/QhullPoints.h>
+
 //#include <polytope/staticPoint.h>
 
 Eigen::Matrix3d mc_impact::crossMatrix(const Eigen::Vector3d & input)

@@ -2,15 +2,11 @@
 
 #include <Eigen/Dense>
 #include <iostream>
-#include <libqhullcpp/Qhull.h>
 #include <memory>
-//#include <libqhullcpp/QhullFacetList.h>
-#include <libqhullcpp/QhullPoints.h>
-//#include <libqhullcpp/QhullVertexSet.h>
+#include <vector>
 
 #include <cmath>
 #include <unordered_set>
-//# include <boost/container_hash/hash.hpp>
 
 namespace mc_impact
 {
@@ -24,6 +20,23 @@ const std::string cyan("\033[0;36m");
 const std::string magenta("\033[0;35m");
 const std::string reset("\033[0m");
 #endif
+
+struct McProjectionParams
+{
+  unsigned iterationLimit = 50;
+  double projectionRadius = 10.0;
+  double convergeThreshold = 0.01;
+  bool useLIPMAssumptions = true;
+  bool debug = false;
+  bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
+};
+
+
+struct IeqConstraintBlocks
+{
+  Eigen::MatrixXd G;
+  Eigen::VectorXd h;
+};
 
 struct ZMPArea
 {

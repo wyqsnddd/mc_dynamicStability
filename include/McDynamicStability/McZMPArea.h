@@ -15,20 +15,17 @@
 namespace mc_impact
 {
 
-struct IeqConstraintBlocks
-{
-  Eigen::MatrixXd G_zmp;
-  Eigen::VectorXd h_zmp;
-};
-
+/*
 struct McZMPAreaParams
 {
   unsigned iterationLimit = 50;
+  double projectionRadius = 10.0;
   double convergeThreshold = 0.01;
   bool useLIPMAssumptions = true;
   bool debug = false;
+  bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
 };
-
+*/
 template<typename Point>
 class McZMPArea
 /*! \brief This is an c++ implementation of the multi-contact-ZMP-area calculation
@@ -51,7 +48,7 @@ class McZMPArea
 public:
   McZMPArea(const mc_rbdyn::Robot & robot,
             std::shared_ptr<McContactSet> contactSetPtr,
-            const McZMPAreaParams & mcZMPAreaParams);
+            const McProjectionParams & mcProjectionParams);
   ~McZMPArea() {}
 
   /*! It needs to be updated in each iteration.
@@ -69,6 +66,8 @@ public:
   ///< Get pointer to the set of contacts.
   inline std::shared_ptr<McContactSet> getContactSet() const
   {
+    assert( contactsPtr_ != nullptr );
+
     return contactsPtr_;
   }
 
@@ -85,20 +84,48 @@ public:
   inline int getMaxNumVertex() const
   {
     // Each iteration should generate a new vetex.
-    return polytopeProjectorPtr_->getMaxIteration();
+    return getParams().iterationLimit;
+    //return polytopeProjectorPtr_->getMaxIteration();
   }
   inline const std::vector<Eigen::Vector2d> & getPolygonVertices() const
   {
     return polygonVertices_;
   }
-  const McZMPAreaParams & getParams() const
+  const McProjectionParams & getParams() const
   {
-    return McZMPAreaParams_;
+    return mcProjectionParams_;
   }
 
   inline const std::shared_ptr<StaticStabilityPolytope> getProjector() const
   {
-    return polytopeProjectorPtr_;
+    if(polytopeProjectorPtr_ == nullptr){
+       throw std::runtime_error("PolytopeProjector is asked without being allocated yet. ");
+    }else{
+       return polytopeProjectorPtr_;
+    }
+  }
+
+  /*! \brief Obtain the ZMP assuming multiple contacts.
+   */
+  const Eigen::Vector3d & getMcZMP() const
+  {
+    return mcZMP_;   
+  }
+
+  /*! \brief Obtain the ZMP assuming double feet support. 
+   */
+  
+  const Eigen::Vector3d & getBipedalZMP() const
+  {
+    return bipedalZMP_;   
+  }
+  
+
+  static Eigen::Vector3d zmpCalculation(const Eigen::Vector3d & normal, const sva::ForceVecd Wrench);
+
+void print() const
+  {
+    std::cerr<<red<<"McZMPArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
   }
 
 private:
@@ -117,7 +144,14 @@ private:
 
   void computeMcZMPArea_(double height);
 
-  McZMPAreaParams McZMPAreaParams_;
+  McProjectionParams mcProjectionParams_;
+
+  Eigen::Vector3d mcZMP_;
+
+  Eigen::Vector3d bipedalZMP_;
+
+  void updateMcZMP_(); 
+  void updateBipedalZMP_(); 
 
   IeqConstraintBlocks ieqConstraintBlocks_;
 
