@@ -1,12 +1,11 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <cmath>
 #include <iostream>
 #include <memory>
-#include <vector>
-
-#include <cmath>
 #include <unordered_set>
+#include <vector>
 
 namespace mc_impact
 {
@@ -30,7 +29,6 @@ struct McProjectionParams
   bool debug = false;
   bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
 };
-
 
 struct IeqConstraintBlocks
 {

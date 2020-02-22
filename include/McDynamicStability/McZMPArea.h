@@ -66,7 +66,7 @@ public:
   ///< Get pointer to the set of contacts.
   inline std::shared_ptr<McContactSet> getContactSet() const
   {
-    assert( contactsPtr_ != nullptr );
+    assert(contactsPtr_ != nullptr);
 
     return contactsPtr_;
   }
@@ -85,7 +85,7 @@ public:
   {
     // Each iteration should generate a new vetex.
     return getParams().iterationLimit;
-    //return polytopeProjectorPtr_->getMaxIteration();
+    // return polytopeProjectorPtr_->getMaxIteration();
   }
   inline const std::vector<Eigen::Vector2d> & getPolygonVertices() const
   {
@@ -98,10 +98,13 @@ public:
 
   inline const std::shared_ptr<StaticStabilityPolytope> getProjector() const
   {
-    if(polytopeProjectorPtr_ == nullptr){
-       throw std::runtime_error("PolytopeProjector is asked without being allocated yet. ");
-    }else{
-       return polytopeProjectorPtr_;
+    if(polytopeProjectorPtr_ == nullptr)
+    {
+      throw std::runtime_error("PolytopeProjector is asked without being allocated yet. ");
+    }
+    else
+    {
+      return polytopeProjectorPtr_;
     }
   }
 
@@ -109,29 +112,28 @@ public:
    */
   const Eigen::Vector3d & getMcZMP() const
   {
-    return mcZMP_;   
+    return mcZMP_;
   }
 
-  /*! \brief Obtain the ZMP assuming double feet support. 
+  /*! \brief Obtain the ZMP assuming double feet support.
    */
-  
+
   const Eigen::Vector3d & getBipedalZMP() const
   {
-    return bipedalZMP_;   
+    return bipedalZMP_;
   }
-  
 
   static Eigen::Vector3d zmpCalculation(const Eigen::Vector3d & normal, const sva::ForceVecd Wrench);
 
-void print() const
+  void print() const
   {
-    std::cerr<<red<<"McZMPArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
+    std::cerr << red << "McZMPArea has: " << getNumVertex() << " vertices (maximum: " << getMaxNumVertex() << reset
+              << std::endl;
   }
 
   /*! Add gui items (Mc ZMP area) to rviz
    */
-  void addGuiItems(mc_control::fsm::Controller &ctl) const;
-
+  void addGuiItems(mc_control::fsm::Controller & ctl) const;
 
 private:
   const mc_rbdyn::Robot & robot_;
@@ -155,8 +157,8 @@ private:
 
   Eigen::Vector3d bipedalZMP_;
 
-  void updateMcZMP_(); 
-  void updateBipedalZMP_(); 
+  void updateMcZMP_();
+  void updateBipedalZMP_();
 
   IeqConstraintBlocks ieqConstraintBlocks_;
 

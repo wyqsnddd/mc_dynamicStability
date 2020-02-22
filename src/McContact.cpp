@@ -3,7 +3,8 @@
 namespace mc_impact
 {
 
-McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot) : mcContactParams_(inputParams), robot_(robot)
+McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot)
+: mcContactParams_(inputParams), robot_(robot)
 {
   // Initialize the local contact points with a square:
 
@@ -16,10 +17,13 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
 
   resultantWrenchMultiplier_.setIdentity();
 
-  if(getContactParams().initialContactStatus){
-     setContact();
-  } else {
-     breakContact(); 
+  if(getContactParams().initialContactStatus)
+  {
+    setContact();
+  }
+  else
+  {
+    breakContact();
   }
 
 #ifdef DEBUG

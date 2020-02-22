@@ -40,7 +40,7 @@ void McComArea::updateMcComArea()
 {
   if(getParams().debug)
   {
-    std::cerr<< red<< "Updating McComArea." << reset<<std::endl;
+    std::cerr << red << "Updating McComArea." << reset << std::endl;
   }
   // Update the contacts (the grasp matrices will be updated):
   contactsPtr_->update();
@@ -54,7 +54,7 @@ void McComArea::computeMcComArea_()
   assert(getContactSet()->getContactMap().size() > 0);
   if(getParams().debug)
   {
-    std::cerr<< red<< "Computing McComArea." << reset<<std::endl;
+    std::cerr << red << "Computing McComArea." << reset << std::endl;
   }
   int numContact = static_cast<int>(getContactSet()->getContactMap().size());
   int rowCWC = static_cast<int>(getContactSet()->getContactMap().begin()->second.contactWrenchCone().rows());
@@ -76,11 +76,10 @@ void McComArea::computeMcComArea_()
   for(auto & contactPair : getContactSet()->getContactMap())
   {
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
-        //contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
+        // contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
         contactPair.second.contactWrenchConeInertialFrame();
-    //G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
+    // G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
     G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = contactPair.second.getResultantWrenchMultiplier();
-        
 
     count++;
   }
@@ -114,7 +113,7 @@ void McComArea::computeMcComArea_()
   {
     updateLIPMAssumptions_(numContact, G);
   }
-  
+
   ///-------------Part Three: Projection E X = f
   /*
    * The equality constraints that specify the projection: polytope -> polygon (on the surface).

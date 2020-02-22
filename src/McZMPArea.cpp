@@ -93,16 +93,15 @@ void McZMPArea<Point>::computeMcZMPArea_(double height)
     // contactPair.second.calcGraspMatrix(tempGraspMatrix, getRobot());
 
     pdPtr_->getF().block(count * rowCWC, count * colCWC, rowCWC, colCWC) =
-        //contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
-        contactPair.second.contactWrenchConeInertialFrame(); 
+        // contactPair.second.contactWrenchCone() * contactPair.second.getGraspMatrix();
+        contactPair.second.contactWrenchConeInertialFrame();
 
-    //G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
+    // G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE).setIdentity();
     // G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = contactPair.second.getGraspMatrix();
-    
+
     G.block<GM_SIZE, GM_SIZE>(0, count * GM_SIZE) = contactPair.second.getResultantWrenchMultiplier();
 
     count++;
-
   }
 
   //  hard-coded matrices when there are leftFoot and rightHand contacts:
@@ -865,7 +864,8 @@ std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
 
   removeDuplicates(polygonVertices_);
   // std::cerr<< "The filtered vertices are: " << std::endl;
-  pointsToInequalityMatrix<Point>(polygonVertices_, ieqConstraintBlocks_.G, ieqConstraintBlocks_.h, LOWER_SLOPE, UPPER_SLOPE);
+  pointsToInequalityMatrix<Point>(polygonVertices_, ieqConstraintBlocks_.G, ieqConstraintBlocks_.h, LOWER_SLOPE,
+                                  UPPER_SLOPE);
 
   if(getParams().debug)
   {
@@ -878,16 +878,16 @@ std::cout << "Intermediate: Matrix  G is: " << std::endl << G << std::endl;
   }
 }
 
-// Static function 
+// Static function
 template<typename Point>
-Eigen::Vector3d McZMPArea<Point>::zmpCalculation(const Eigen::Vector3d & groundNormal, const sva::ForceVecd inputWrench) 
+Eigen::Vector3d McZMPArea<Point>::zmpCalculation(const Eigen::Vector3d & groundNormal, const sva::ForceVecd inputWrench)
 {
 
-  Eigen::Matrix3d crossGroundNormal  = crossMatrix(groundNormal);
+  Eigen::Matrix3d crossGroundNormal = crossMatrix(groundNormal);
 
   double denominator = groundNormal.dot(inputWrench.force());
 
-  return (crossGroundNormal*inputWrench.couple())*(1.0/denominator);
+  return (crossGroundNormal * inputWrench.couple()) * (1.0 / denominator);
 }
 
 template<typename Point>
@@ -895,55 +895,51 @@ void McZMPArea<Point>::updateBipedalZMP_()
 {
 
   assert(getContactSet()->getContactMap().size() > 0);
-// Read the wrenches for the multi-contact phase.
-   sva::ForceVecd forceSum;
-   forceSum.force() = Eigen::Vector3d::Zero();
-   forceSum.couple() = Eigen::Vector3d::Zero();
+  // Read the wrenches for the multi-contact phase.
+  sva::ForceVecd forceSum;
+  forceSum.force() = Eigen::Vector3d::Zero();
+  forceSum.couple() = Eigen::Vector3d::Zero();
 
-   auto leftFootContact = getContactSet()->getContact("LeftFoot");
-   auto rightFootContact = getContactSet()->getContact("RightFoot");
+  auto leftFootContact = getContactSet()->getContact("LeftFoot");
+  auto rightFootContact = getContactSet()->getContact("RightFoot");
 
+  sva::PTransformd X_lSole_0 = getRobot().bodyPosW(leftFootContact.getContactParams().bodyName).inv();
+  sva::ForceVecd fl_sensor = getRobot().bodyWrench(leftFootContact.getContactParams().bodyName);
+  sva::ForceVecd fl_0 = X_lSole_0.dualMul(fl_sensor);
 
-   sva::PTransformd X_lSole_0 = getRobot().bodyPosW(leftFootContact.getContactParams().bodyName).inv();
-   sva::ForceVecd fl_sensor = getRobot().bodyWrench(leftFootContact.getContactParams().bodyName);
-   sva::ForceVecd fl_0 = X_lSole_0.dualMul(fl_sensor);
+  forceSum += fl_0;
 
-   forceSum += fl_0;
+  sva::PTransformd X_rSole_0 = getRobot().bodyPosW(rightFootContact.getContactParams().bodyName).inv();
+  sva::ForceVecd fr_sensor = getRobot().bodyWrench(rightFootContact.getContactParams().bodyName);
+  sva::ForceVecd fr_0 = X_rSole_0.dualMul(fr_sensor);
 
-   sva::PTransformd X_rSole_0 = getRobot().bodyPosW(rightFootContact.getContactParams().bodyName).inv();
-   sva::ForceVecd fr_sensor = getRobot().bodyWrench(rightFootContact.getContactParams().bodyName);
-   sva::ForceVecd fr_0 = X_rSole_0.dualMul(fr_sensor);
+  forceSum += fr_0;
 
-   forceSum += fr_0;
-  
-  bipedalZMP_ =  zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
-
+  bipedalZMP_ = zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
 }
-
 
 template<typename Point>
 void McZMPArea<Point>::updateMcZMP_()
 {
 
   assert(getContactSet()->getContactMap().size() > 0);
-// Read the wrenches for the multi-contact phase.
-   sva::ForceVecd forceSum;
-   forceSum.force() = Eigen::Vector3d::Zero();
-   forceSum.couple() = Eigen::Vector3d::Zero();
+  // Read the wrenches for the multi-contact phase.
+  sva::ForceVecd forceSum;
+  forceSum.force() = Eigen::Vector3d::Zero();
+  forceSum.couple() = Eigen::Vector3d::Zero();
 
   for(auto & contactPair : getContactSet()->getContactMap())
   {
-     //std::string surfaceName = contactPair.second.getContactParams().surfaceName;
-     std::string bodyName = contactPair.second.getContactParams().bodyName;
-     sva::PTransformd X_ee_0 = getRobot().bodyPosW(bodyName).inv(); 
+    // std::string surfaceName = contactPair.second.getContactParams().surfaceName;
+    std::string bodyName = contactPair.second.getContactParams().bodyName;
+    sva::PTransformd X_ee_0 = getRobot().bodyPosW(bodyName).inv();
 
-     sva::ForceVecd wrench_sensor = getRobot().bodyWrench(bodyName);
-     sva::ForceVecd wrench_inertial = X_ee_0.dualMul(wrench_sensor);
-     forceSum += wrench_inertial;
+    sva::ForceVecd wrench_sensor = getRobot().bodyWrench(bodyName);
+    sva::ForceVecd wrench_inertial = X_ee_0.dualMul(wrench_sensor);
+    forceSum += wrench_inertial;
   }
 
-
-  mcZMP_ =  zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
+  mcZMP_ = zmpCalculation(Eigen::Vector3d::UnitZ(), forceSum);
 
   /*
   Eigen::Vector3d groundNormal = Eigen::Vector3d::UnitZ();
@@ -954,7 +950,6 @@ void McZMPArea<Point>::updateMcZMP_()
 
   mcZMP_ =  (crossGroundNormal*forceSum.couple())*(1.0/denominator);
   */
-
 }
 
 /*
@@ -1023,22 +1018,18 @@ void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::Matri
 }
 
 template<typename Point>
-void McZMPArea<Point>::addGuiItems(mc_control::fsm::Controller &ctl) const
+void McZMPArea<Point>::addGuiItems(mc_control::fsm::Controller & ctl) const
 {
-  ctl.gui()->addElement(
-      {"ZMP"},
-      mc_rtc::gui::Polygon("Multi-contact-SupportArea", mc_rtc::gui::Color(0.0, 1., 0.),
-                           [this]() -> std::vector<Eigen::Vector3d> {
-                             std::vector<Eigen::Vector3d> polygonPoints;
-                             for(auto & q : getPolygonVertices())
-                             {
-                               polygonPoints.emplace_back(Eigen::Vector3d{q.x(), q.y(), 0.0});
-                             }
-                             return polygonPoints;
-                           })
-      );
-
-
+  ctl.gui()->addElement({"ZMP"},
+                        mc_rtc::gui::Polygon("Multi-contact-SupportArea", mc_rtc::gui::Color(0.0, 1., 0.),
+                                             [this]() -> std::vector<Eigen::Vector3d> {
+                                               std::vector<Eigen::Vector3d> polygonPoints;
+                                               for(auto & q : getPolygonVertices())
+                                               {
+                                                 polygonPoints.emplace_back(Eigen::Vector3d{q.x(), q.y(), 0.0});
+                                               }
+                                               return polygonPoints;
+                                             }));
 }
 // Instantiate the McZMPArea
 // template class mc_impact::McZMPArea<Eigen::Vector3d>;

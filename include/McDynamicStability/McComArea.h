@@ -3,6 +3,13 @@
 #include <mc_control/fsm/Controller.h>
 #include <mc_rbdyn/Robots.h>
 
+#include <geos/geom/CoordinateSequenceFactory.h>
+#include <geos/geom/GeometryFactory.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/Point.h>
+#include <geos/geom/Polygon.h>
+#include <geos/version.h>
+
 #include "McDynamicStability/McContact.h"
 #include "McDynamicStability/McPolytopeDescriptor.h"
 #include <Eigen/Dense>
@@ -13,26 +20,17 @@
 #include <math.h>
 #include <polytope/staticStabilityPolytope.h>
 
-#include <geos/version.h>
-
-#include <geos/geom/CoordinateSequenceFactory.h>
-#include <geos/geom/GeometryFactory.h>
-#include <geos/geom/LinearRing.h>
-#include <geos/geom/Polygon.h>
-
-#include <geos/geom/Point.h>
-
 namespace mc_impact
 {
 
-	/*
+/*
 struct McComAreaParams
 {
-  unsigned iterationLimit = 50;
-  double projectionRadius = 10.0;
-  double convergeThreshold = 0.01;
-  bool useLIPMAssumptions = true;
-  bool debug = false;
+unsigned iterationLimit = 50;
+double projectionRadius = 10.0;
+double convergeThreshold = 0.01;
+bool useLIPMAssumptions = true;
+bool debug = false;
 };
 
 */
@@ -88,7 +86,7 @@ public:
   inline int getMaxNumVertex() const
   {
     // Each iteration should generate a new vetex.
-    //return polytopeProjectorPtr_->getMaxIteration();
+    // return polytopeProjectorPtr_->getMaxIteration();
     return static_cast<int>(getParams().iterationLimit);
   }
 
@@ -110,22 +108,22 @@ public:
   }
 
   /*!
-   * \brief Get the centroid of the projected multi-contact com area. 
+   * \brief Get the centroid of the projected multi-contact com area.
    */
-  inline const Eigen::Vector3d getCentroid()const
+  inline const Eigen::Vector3d getCentroid() const
   {
-    return centroid_; 
+    return centroid_;
   }
 
   void print() const
   {
-    std::cerr<<red<<"McComArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
+    std::cerr << red << "McComArea has: " << getNumVertex() << " vertices (maximum: " << getMaxNumVertex() << reset
+              << std::endl;
   }
 
   /*! Add gui items (Mc Com static equilibrium area) to rviz
    */
-  void addGuiItems(mc_control::fsm::Controller &ctl) const;
-
+  void addGuiItems(mc_control::fsm::Controller & ctl) const;
 
 private:
   const mc_rbdyn::Robot & robot_;
