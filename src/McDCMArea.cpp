@@ -139,4 +139,21 @@ bool McDCMArea::updateMcDCMArea()
   return true; 
 }
 
+void McDCMArea::addGuiItems(mc_control::fsm::Controller &ctl) const
+{
+  ctl.gui()->addElement({"DCM"},
+                    mc_rtc::gui::Polygon("DCM-SupportArea", mc_rtc::gui::Color(1.0, 0., 0.),
+                                         [this]() -> std::vector<Eigen::Vector3d> {
+                                           std::vector<Eigen::Vector3d> polygonPoints;
+                                           for(auto & q : getPolygonVertices())
+                                           {
+                                             polygonPoints.emplace_back(Eigen::Vector3d{q.x(), q.y(), 0.0});
+                                           }
+                                           return polygonPoints;
+
+                                         })
+		    );
+
 }
+
+} // end of namespace 

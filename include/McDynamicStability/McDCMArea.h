@@ -75,6 +75,12 @@ class McDCMArea
   {
     std::cerr<<red<<"McDCMArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
   }
+
+  /*! Add gui items (Mc DCM area) to rviz
+   */
+  void addGuiItems(mc_control::fsm::Controller &ctl) const;
+
+
   private:
 
   std::shared_ptr<McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr_;

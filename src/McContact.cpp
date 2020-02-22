@@ -3,7 +3,7 @@
 namespace mc_impact
 {
 
-McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot) : mcContactParams_(inputParams)
+McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot) : mcContactParams_(inputParams), robot_(robot)
 {
   // Initialize the local contact points with a square:
 
@@ -26,14 +26,14 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
   std::cout << cyan << "Creating contact: " << getContactParams().surfaceName << reset << std::endl;
 #endif
 
-  update(robot);
+  update();
 }
 
-void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
+void McContact::calcGeometricGraspMatrix_()
 {
 
   graspMatrix_.setIdentity();
-  auto X_0_c = robot.surfacePose(getContactParams().surfaceName);
+  auto X_0_c = robot().surfacePose(getContactParams().surfaceName);
 
   // graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation().transpose();
   graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation();
@@ -72,15 +72,15 @@ void McContact::calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot)
 */
 }
 
-void McContact::calcGraspMatrix_(const mc_rbdyn::Robot & robot)
+void McContact::calcGraspMatrix_()
 {
 
   // --------------- Use the dual-matrix as the
-  // sva::PTransformd X_c_0 = robot.surfacePose(getContactParams().surfaceName).inv();
+  // sva::PTransformd X_c_0 = robot().surfacePose(getContactParams().surfaceName).inv();
   // graspMatrix_ = X_c_0.dualMatrix();
 
   // ---------------
-  sva::PTransformd X_0_c = robot.surfacePose(getContactParams().surfaceName);
+  sva::PTransformd X_0_c = robot().surfacePose(getContactParams().surfaceName);
   graspMatrix_.setIdentity();
   /* This is a manual calculation */
   graspMatrix_.block<3, 3>(0, 0) = X_0_c.rotation();
@@ -158,17 +158,17 @@ void McContact::initializeCWC_()
 
 }
 
-void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
+void McContact::updateContactAreaVerticiesAndCoP_()
 {
 
   inertialContactAreaVertices_.clear();
 
   
-  const sva::PTransformd & X_0_s = robot.surfacePose(getContactParams().surfaceName);
-  //const sva::PTransformd & X_s_0 = robot.surfacePose(getContactParams().surfaceName).inv();
+  const sva::PTransformd & X_0_s = robot().surfacePose(getContactParams().surfaceName);
+  //const sva::PTransformd & X_s_0 = robot().surfacePose(getContactParams().surfaceName).inv();
 
   // (0) Update the contact area points: 
-  const auto & surface = robot.surface(getContactParams().surfaceName);
+  const auto & surface = robot().surface(getContactParams().surfaceName);
   const auto & pts = surface.points();
   auto rotation = X_0_s.rotation().inverse();
   //auto translation = - rotation * X_0_s.translation();
@@ -208,10 +208,10 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   inertialSurfaceVertices_.clear();
   //std::vector<Eigen::Vector3d> points;
   //const auto & surface = const_cast<mc_rbdyn::Surface &>(*contact.r1Surface());
-  //const auto & surface = robot.surface(getContactParams().surfaceName);
+  //const auto & surface = robot().surface(getContactParams().surfaceName);
     // Points in body frame
   //const auto & pts = surface.points();
-  const sva::PTransformd & X_0_b = robot.bodyPosW(surface.bodyName());
+  const sva::PTransformd & X_0_b = robot().bodyPosW(surface.bodyName());
   
 
   for(const auto & p : pts)
@@ -222,7 +222,7 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
   }
 
   // (2) Update the CoP 
-  auto inputWrench= robot.forceSensor(getContactParams().sensorName).wrench();
+  auto inputWrench= robot().forceSensor(getContactParams().sensorName).wrench();
   //std::cerr<<red<<"Void update of contact CoP "<<reset<<std::endl;
   
   measuredCoP_.setZero();
@@ -240,35 +240,35 @@ void McContact::updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot)
 
  }
 
-void McContact::update(const mc_rbdyn::Robot & robot)
+void McContact::update()
 {
 
   // (0) Update the CWC in the inertial frame 
-  updateCWCInertial_(robot);
+  updateCWCInertial_();
 
   // (1) Update the GraspMatrix 
   if(getContactParams().useSpatialVectorAlgebra)
   {
-    calcGraspMatrix_(robot);
+    calcGraspMatrix_();
   }
   else
   {
-    calcGeometricGraspMatrix_(robot);
+    calcGeometricGraspMatrix_();
   }
 
   // (2) Update the vertices 
   // In the future we may use GEOS to create more complex contact area. 
-  updateContactAreaVerticiesAndCoP_(robot);
+  updateContactAreaVerticiesAndCoP_();
 
 
     
   // 
 }
 
-void McContact::updateCWCInertial_(const mc_rbdyn::Robot & robot)
+void McContact::updateCWCInertial_()
 {
 
-  const sva::PTransformd & X_0_s = robot.surfacePose(getContactParams().surfaceName);
+  const sva::PTransformd & X_0_s = robot().surfacePose(getContactParams().surfaceName);
 
   auto rotationTranspose = X_0_s.rotation();
   auto translation = X_0_s.translation();
@@ -288,6 +288,102 @@ void McContact::updateCWCInertial_(const mc_rbdyn::Robot & robot)
 
 
 }
+
+
+void McContact::addGuiItems(mc_control::fsm::Controller &ctl) const
+{
+
+  mc_rtc::gui::ArrowConfig surfaceNormalConfig({0., 0., 1.});
+  surfaceNormalConfig.start_point_scale = 0.0;
+  surfaceNormalConfig.end_point_scale = 0.0;
+
+  mc_rtc::gui::ArrowConfig surfaceXConfig({1., 0., 0.});
+  surfaceXConfig.start_point_scale = 0.0;
+  surfaceXConfig.end_point_scale = 0.0;
+
+  mc_rtc::gui::ArrowConfig surfaceYConfig({0., 1., 0.});
+  surfaceYConfig.start_point_scale = 0.0;
+  surfaceYConfig.end_point_scale = 0.0;
+
+  mc_rtc::gui::ArrowConfig surfaceZConfig({0., 0., 1.});
+  surfaceZConfig.start_point_scale = 0.0;
+  surfaceZConfig.end_point_scale = 0.0;
+
+  double arrowLengthScale = 0.2;
+
+	// TODO: new name for the contact points
+  ctl.gui()->addElement(
+        {"McContacts"},
+        mc_rtc::gui::Polygon(getContactParams().surfaceName + "ContactVertices", mc_rtc::gui::Color(0., 0., 1.),
+                             [this]() -> const std::vector<Eigen::Vector3d> & {
+                                   return getContactAreaVertices();
+                             }),
+        mc_rtc::gui::Polygon(getContactParams().surfaceName + "SurfaceVertices", mc_rtc::gui::Color(0., 1.0, 0.0),
+                             [this ]() -> const std::vector<Eigen::Vector3d> & {
+                               return getSurfaceVertices();
+                             }),
+        mc_rtc::gui::Point3D(getContactParams().surfaceName + "CoP",
+                             [this]() -> Eigen::Vector3d {
+                               return measuredCop();
+                             }),
+
+        mc_rtc::gui::Arrow(getContactParams().surfaceName + "SurfaceNomal", surfaceNormalConfig,
+                           [this]() -> Eigen::Vector3d {
+                             // start of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             return X_0_s.translation();
+                           },
+                           [this, arrowLengthScale]() {
+                             // End of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             Eigen::Vector3d z_axis =
+                                 X_0_s.translation() + arrowLengthScale * (X_0_s.rotation().transpose().block<3, 1>(0, 2));
+                             return z_axis;
+                           }),
+        mc_rtc::gui::Arrow(getContactParams().surfaceName + "SurfaceX", surfaceXConfig,
+                           [this]() -> Eigen::Vector3d {
+                             // start of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             return X_0_s.translation();
+                           },
+                           [this, arrowLengthScale]() -> Eigen::Vector3d {
+                             // End of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             Eigen::Vector3d x_axis =
+                                 X_0_s.translation() + arrowLengthScale * (X_0_s.rotation().transpose().block<3, 1>(0, 0));
+                             return x_axis;
+                           }),
+        mc_rtc::gui::Arrow(getContactParams().surfaceName + "SurfaceY", surfaceYConfig,
+                           [this]() -> Eigen::Vector3d {
+                             // start of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             return X_0_s.translation();
+                           },
+                           [this, arrowLengthScale]() -> Eigen::Vector3d {
+                             // End of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             Eigen::Vector3d y_axis =
+                                 X_0_s.translation() + arrowLengthScale * (X_0_s.rotation().transpose().block<3, 1>(0, 1));
+                             return y_axis;
+                           }),
+       mc_rtc::gui::Arrow(getContactParams().surfaceName + "SurfaceZ", surfaceZConfig,
+                           [this]() -> Eigen::Vector3d {
+                             // start of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             return X_0_s.translation();
+                           },
+                           [this, arrowLengthScale]() -> Eigen::Vector3d {
+                             // End of the arrow
+                             auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
+                             Eigen::Vector3d y_axis =
+                                 X_0_s.translation() + arrowLengthScale * (X_0_s.rotation().transpose().block<3, 1>(0, 2));
+                             return y_axis;
+                           })
+
+
+    );
+}
+
 
 const McContact & McContactSet::getContact(const std::string & name) const
 {
@@ -323,11 +419,19 @@ bool McContactSet::addContact(const McContactParams & inputParams, const mc_rbdy
 
  
 
-void McContactSet::update(const mc_rbdyn::Robot & robot)
+void McContactSet::update()
 {
   for(auto & contactPair:contacts_)
   {
-    contactPair.second.update(robot);
+    contactPair.second.update();
+  }
+}
+
+void McContactSet::addGuiItems(mc_control::fsm::Controller &ctl) const
+{
+  for(auto & contactPair:contacts_)
+  {
+    contactPair.second.addGuiItems(ctl);
   }
 }
 

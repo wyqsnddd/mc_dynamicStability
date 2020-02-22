@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mc_control/fsm/Controller.h>
 #include <mc_rbdyn/Robots.h>
 
 #include "McDynamicStability/McContact.h"
@@ -120,6 +121,11 @@ public:
   {
     std::cerr<<red<<"McComArea has: "<< getNumVertex()<<" vertices (maximum: "<<getMaxNumVertex()<<reset<<std::endl; 
   }
+
+  /*! Add gui items (Mc Com static equilibrium area) to rviz
+   */
+  void addGuiItems(mc_control::fsm::Controller &ctl) const;
+
 
 private:
   const mc_rbdyn::Robot & robot_;

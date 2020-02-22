@@ -51,7 +51,7 @@ void McZMPArea<Point>::updateMcZMPArea(double height)
   updateBipedalZMP_();
 
   // Update the contacts (the grasp matrices will be updated):
-  contactsPtr_->update(getRobot());
+  contactsPtr_->update();
 
   // Update the Multi-contact ZMP area:
   computeMcZMPArea_(height);
@@ -1022,6 +1022,24 @@ void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::Matri
   }
 }
 
+template<typename Point>
+void McZMPArea<Point>::addGuiItems(mc_control::fsm::Controller &ctl) const
+{
+  ctl.gui()->addElement(
+      {"ZMP"},
+      mc_rtc::gui::Polygon("Multi-contact-SupportArea", mc_rtc::gui::Color(0.0, 1., 0.),
+                           [this]() -> std::vector<Eigen::Vector3d> {
+                             std::vector<Eigen::Vector3d> polygonPoints;
+                             for(auto & q : getPolygonVertices())
+                             {
+                               polygonPoints.emplace_back(Eigen::Vector3d{q.x(), q.y(), 0.0});
+                             }
+                             return polygonPoints;
+                           })
+      );
+
+
+}
 // Instantiate the McZMPArea
 // template class mc_impact::McZMPArea<Eigen::Vector3d>;
 template class mc_impact::McZMPArea<Eigen::Vector2d>;

@@ -43,7 +43,7 @@ void McComArea::updateMcComArea()
     std::cerr<< red<< "Updating McComArea." << reset<<std::endl;
   }
   // Update the contacts (the grasp matrices will be updated):
-  contactsPtr_->update(getRobot());
+  contactsPtr_->update();
 
   // Update the Multi-contact Com static equilibrium area:
   computeMcComArea_();
@@ -235,4 +235,22 @@ void McComArea::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & i
   }
 
 }
+
+void McComArea::addGuiItems(mc_control::fsm::Controller &ctl) const
+{
+  ctl.gui()->addElement({"ComArea"},
+                    mc_rtc::gui::Polygon("Multi-contact-Com-StaticEquilibriumArea", mc_rtc::gui::Color(0.0, 0., 1.),
+                                         [this]() -> std::vector<Eigen::Vector3d> {
+                                           std::vector<Eigen::Vector3d> polygonPoints;
+                                           for(auto & q :getPolygonVertices())
+                                           {
+                                             polygonPoints.emplace_back(Eigen::Vector3d{q.x(), q.y(), 0.0});
+                                           }
+                                           return polygonPoints;
+                                         }));
+
+
+
 }
+
+} // end of namespace 

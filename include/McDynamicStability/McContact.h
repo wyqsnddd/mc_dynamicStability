@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mc_control/fsm/Controller.h>
 #include <mc_rbdyn/Robots.h>
 
 #include "Utils.h"
@@ -38,7 +39,8 @@ public:
 
   /*! \brief Updates: (1) CoP (2) Contact Vertices (3) Grasp Matrix.
    */
-  void update(const mc_rbdyn::Robot & robot);
+  //void update(const mc_rbdyn::Robot & robot);
+  void update();
 
   inline const McContactParams & getContactParams() const
   {
@@ -88,7 +90,7 @@ public:
 
   /*! \brief MeasuredCoP of the contact surface frame, e.g. LeftFoot or RightFoot, in the INERTIAL frame.
    */
-  inline const Eigen::Vector3d & measuredCop()
+  inline const Eigen::Vector3d & measuredCop() const
   {
     return measuredCoP_;
   }
@@ -124,8 +126,22 @@ public:
      return inContact_; 
   }
 
+  /*! Add gui items (contact points, surface normals and eg. ) to rviz
+   */
+  void addGuiItems(mc_control::fsm::Controller &ctl) const;
+
+
+  /*! \return reference to the robot (either pyhsices-engine simulated or real)
+   */
+  inline const mc_rbdyn::Robot & robot() const
+  {
+    return robot_;
+  }
+
 private:
   McContactParams mcContactParams_;
+
+  const mc_rbdyn::Robot & robot_;
 
   sva::ForceVecd desiredWrench_ = sva::ForceVecd::Zero(); ///< Desired wrench in the body frame, e.g. l/r_sole ;
   Eigen::Vector3d desiredCoP_ =
@@ -136,9 +152,11 @@ private:
   Eigen::MatrixXd CWCInertial_; ///< Contact wrench cone in the inertial contact frame, i.e. the robot inertial frame: X_0.
   Eigen::Matrix6d resultantWrenchMultiplier_; ///< Wrench*Multiplier gives the resultant wrench at the origin of the intertial frame
 
-  void updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot);
+  void updateContactAreaVerticiesAndCoP_();
+  //void updateContactAreaVerticiesAndCoP_(const mc_rbdyn::Robot & robot);
 
-  void updateCWCInertial_(const mc_rbdyn::Robot & robot);
+  //void updateCWCInertial_(const mc_rbdyn::Robot & robot);
+  void updateCWCInertial_();
 
   inline const std::vector<Eigen::Vector3d> & getLocalContactAreaVerticies_() const
   {
@@ -159,12 +177,13 @@ private:
    *  In the future, we need one more argument: the name of the target frame.
    *  this function follows the `spatial-vector-algebra`.
    */
-  void calcGraspMatrix_(const mc_rbdyn::Robot & robot);
+  void calcGraspMatrix_();
 
   /* \brief This function follows the `GeometricRobotics`.
    * The difference is that we assume the wrench is given as: [Torque, Force].
    */
-  void calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot);
+  void calcGeometricGraspMatrix_();
+  //void calcGeometricGraspMatrix_(const mc_rbdyn::Robot & robot);
 
   void initializeCWC_();
 
@@ -189,7 +208,12 @@ public:
     return contacts_;
   }
 
-  void update(const mc_rbdyn::Robot & robot);
+  //void update(const mc_rbdyn::Robot & robot);
+  void update();
+
+  /*! Add gui items (contact points, surface normals and eg. ) of all the contacts to rviz
+   */
+  void addGuiItems(mc_control::fsm::Controller &ctl) const;
 
 private:
   std::map<std::string, mc_impact::McContact> contacts_;
