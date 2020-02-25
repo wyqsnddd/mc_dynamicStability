@@ -134,6 +134,7 @@ public:
   /*! Add gui items (Mc ZMP area) to rviz
    */
   void addGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeGuiItems(mc_control::fsm::Controller & ctl) const;
 
 private:
   const mc_rbdyn::Robot & robot_;

@@ -293,7 +293,17 @@ void McContact::updateCWCInertial_()
 
 }
 
+void McContact::removeGuiItems(mc_control::fsm::Controller &ctl) const
+{
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "ContactVertices");
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "SurfaceVertices");
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "CoP");
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "SurfaceNormal");
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "SurfaceX");
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "SurfaceY");
+ ctl.gui()->removeElement({"McContacts"}, getContactParams().surfaceName + "SurfaceZ");
 
+}
 void McContact::addGuiItems(mc_control::fsm::Controller &ctl) const
 {
 
@@ -331,7 +341,7 @@ void McContact::addGuiItems(mc_control::fsm::Controller &ctl) const
                                return measuredCop();
                              }),
 
-        mc_rtc::gui::Arrow(getContactParams().surfaceName + "SurfaceNomal", surfaceNormalConfig,
+        mc_rtc::gui::Arrow(getContactParams().surfaceName + "SurfaceNormal", surfaceNormalConfig,
                            [this]() -> Eigen::Vector3d {
                              // start of the arrow
                              auto X_0_s = this->robot().surfacePose(getContactParams().surfaceName);
@@ -446,7 +456,13 @@ void McContactSet::update()
     contactPair.second.update();
   }
 }
-
+void McContactSet::removeGuiItems(mc_control::fsm::Controller &ctl) const
+{
+  for(auto & contactPair:contacts_)
+  {
+    contactPair.second.removeGuiItems(ctl);
+  }
+}
 void McContactSet::addGuiItems(mc_control::fsm::Controller &ctl) const
 {
   for(auto & contactPair:contacts_)

@@ -131,7 +131,10 @@ bool McDCMArea::updateMcDCMArea()
 
   return true;
 }
-
+void McDCMArea::removeGuiItems(mc_control::fsm::Controller & ctl) const
+{
+  ctl.gui()->removeElement({"DCM"}, "DCM-SupportArea");
+}
 void McDCMArea::addGuiItems(mc_control::fsm::Controller & ctl) const
 {
   ctl.gui()->addElement({"DCM"},

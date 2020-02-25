@@ -76,6 +76,7 @@ public:
   /*! Add gui items (Mc DCM area) to rviz
    */
   void addGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeGuiItems(mc_control::fsm::Controller & ctl) const;
 
 private:
   std::shared_ptr<McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr_;

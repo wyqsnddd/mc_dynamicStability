@@ -1016,6 +1016,11 @@ void McZMPArea<Point>::updateLIPMAssumptions_(int numContact, const Eigen::Matri
     std::cerr << "Intermediate: Matrix  B is: " << std::endl << B << std::endl;
   }
 }
+template<typename Point>
+void McZMPArea<Point>::removeGuiItems(mc_control::fsm::Controller & ctl) const
+{
+   ctl.gui()->removeElement({"ZMP"}, "Multi-contact-SupportArea");
+}
 
 template<typename Point>
 void McZMPArea<Point>::addGuiItems(mc_control::fsm::Controller & ctl) const

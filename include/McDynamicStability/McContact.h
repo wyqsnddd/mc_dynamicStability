@@ -133,6 +133,7 @@ public:
   /*! Add gui items (contact points, surface normals and eg. ) to rviz
    */
   void addGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeGuiItems(mc_control::fsm::Controller & ctl) const;
 
   /*! \return reference to the robot (either pyhsices-engine simulated or real)
    */
@@ -219,6 +220,7 @@ public:
   /*! Add gui items (contact points, surface normals and eg. ) of all the contacts to rviz
    */
   void addGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeGuiItems(mc_control::fsm::Controller & ctl) const;
 
   bool hasContact(const std::string & name);
   inline const std::vector<std::string> & getSustainedContactSet() 

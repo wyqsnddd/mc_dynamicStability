@@ -234,6 +234,11 @@ void McComArea::updateLIPMAssumptions_(int numContact, const Eigen::MatrixXd & i
   }
 
 }
+void McComArea::removeGuiItems(mc_control::fsm::Controller &ctl) const
+{
+  ctl.gui()->removeElement({"ComArea"},"Multi-contact-Com-StaticEquilibriumArea");
+
+}
 
 void McComArea::addGuiItems(mc_control::fsm::Controller &ctl) const
 {
