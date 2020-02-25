@@ -220,8 +220,15 @@ public:
    */
   void addGuiItems(mc_control::fsm::Controller & ctl) const;
 
+  inline const std::vector<std::string> & getSustainedContactSet() 
+  {
+    return sustainedContactSet_; 
+  }
+  void addSustainedContact(std::string);
 private:
+  bool hasContact_(const std::string & name);
   std::map<std::string, mc_impact::McContact> contacts_;
+  std::vector<std::string> sustainedContactSet_;
 };
 
 } // namespace mc_impact

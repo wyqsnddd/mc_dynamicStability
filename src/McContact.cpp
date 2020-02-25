@@ -388,9 +388,20 @@ void McContact::addGuiItems(mc_control::fsm::Controller &ctl) const
     );
 }
 
-
-const McContact & McContactSet::getContact(const std::string & name) const
+bool McContactSet::hasContact_(const std::string & name)
 {
+  auto opt = contacts_.find(name);
+  if(opt != (contacts_.end()))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+
+}
+const McContact & McContactSet::getContact(const std::string & name) const {
   auto opt = contacts_.find(name);
   if(opt != (contacts_.end()))
   {
@@ -422,6 +433,18 @@ bool McContactSet::addContact(const McContactParams & inputParams, const mc_rbdy
 }
 
  
+void McContactSet::addSustainedContact(std::string contactName)
+{
+  if(hasContact_(contactName))
+  {
+    sustainedContactSet_.push_back(contactName);
+  }
+  else
+  {
+    throw std::runtime_error("Trying to set a sustained contact without adding it to the contact set."); 
+  }
+
+}
 
 void McContactSet::update()
 {
