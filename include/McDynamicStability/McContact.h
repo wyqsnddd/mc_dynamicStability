@@ -28,6 +28,10 @@ struct McContactParams
   bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
                                         ///< we represent wrench = [f, \tau].
   bool initialContactStatus;
+
+  
+  // Use integers to represent axis directions:{ x-axis: 0, y-axis: 1, z-axis: 2 }. By default, we choose z-axis.
+  int surfaceNormalAxis = 2;
 };
 
 class McContact
