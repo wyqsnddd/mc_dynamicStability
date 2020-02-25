@@ -17,7 +17,7 @@ McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot 
 
   resultantWrenchMultiplier_.setIdentity();
 
-  if(getContactParams().initialContactStatus)
+  if(getContactParams().sustainedContact)
   {
     setContact();
   }
@@ -388,7 +388,7 @@ void McContact::addGuiItems(mc_control::fsm::Controller &ctl) const
     );
 }
 
-bool McContactSet::hasContact_(const std::string & name)
+bool McContactSet::hasContact(const std::string & name)
 {
   auto opt = contacts_.find(name);
   if(opt != (contacts_.end()))
@@ -424,27 +424,20 @@ bool McContactSet::addContact(const McContactParams & inputParams, const mc_rbdy
     return false;
   }
 
+  auto contactName = inputParams.surfaceName;
 
-  contacts_.insert({inputParams.surfaceName, {inputParams, robot}});
+  if(inputParams.sustainedContact)
+  {
+    sustainedContactSet_.push_back(contactName);
+  }
+
+  contacts_.insert({contactName, {inputParams, robot}});
 
   //std::cout << "McContactSet: Adding end-effector contact: " << inputParams.surfaceName << std::endl;
 
   return true;
 }
 
- 
-void McContactSet::addSustainedContact(std::string contactName)
-{
-  if(hasContact_(contactName))
-  {
-    sustainedContactSet_.push_back(contactName);
-  }
-  else
-  {
-    throw std::runtime_error("Trying to set a sustained contact without adding it to the contact set."); 
-  }
-
-}
 
 void McContactSet::update()
 {

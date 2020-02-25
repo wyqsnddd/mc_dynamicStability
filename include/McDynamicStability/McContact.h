@@ -27,7 +27,7 @@ struct McContactParams
   int index = 0; ///< Index of the contact in the wrenchDistributionQP.
   bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
                                         ///< we represent wrench = [f, \tau].
-  bool initialContactStatus;
+  bool sustainedContact;
 
   
   // Use integers to represent axis directions:{ x-axis: 0, y-axis: 1, z-axis: 2 }. By default, we choose z-axis.
@@ -220,13 +220,13 @@ public:
    */
   void addGuiItems(mc_control::fsm::Controller & ctl) const;
 
+  bool hasContact(const std::string & name);
   inline const std::vector<std::string> & getSustainedContactSet() 
   {
     return sustainedContactSet_; 
   }
-  void addSustainedContact(std::string);
+  //void addSustainedContact(std::string);
 private:
-  bool hasContact_(const std::string & name);
   std::map<std::string, mc_impact::McContact> contacts_;
   std::vector<std::string> sustainedContactSet_;
 };
