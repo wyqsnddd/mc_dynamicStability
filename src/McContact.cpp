@@ -3,8 +3,8 @@
 namespace mc_impact
 {
 
-McContact::McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot)
-: mcContactParams_(inputParams), robot_(robot)
+McContact::McContact(const McContactParams & inputParams, bool useSpatialVectorAlgebra, const mc_rbdyn::Robot & robot)
+: mcContactParams_(inputParams), useSpatialVectorAlgebra_(useSpatialVectorAlgebra), robot_(robot)
 {
   // Initialize the local contact points with a square:
 
@@ -114,7 +114,7 @@ void McContact::initializeCWC_()
   CWCInertial_.setZero();
 
   // clang-format off
-  if(getContactParams().useSpatialVectorAlgebra)
+  if(useSVA())
   {
     CWC_ <<
       // mx,  my,  mz,  fx,  fy,            fz,
@@ -251,7 +251,7 @@ void McContact::update()
   updateCWCInertial_();
 
   // (1) Update the GraspMatrix 
-  if(getContactParams().useSpatialVectorAlgebra)
+  if(useSVA())
   {
     calcGraspMatrix_();
   }
@@ -423,7 +423,7 @@ const McContact & McContactSet::getContact(const std::string & name) const {
   }
 }
 
-bool McContactSet::addContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot)
+bool McContactSet::addContact(const McContactParams & inputParams, bool useSpatialVectorAlgebra, const mc_rbdyn::Robot & robot)
 {
   auto opt = contacts_.find(inputParams.surfaceName);
 
@@ -441,7 +441,7 @@ bool McContactSet::addContact(const McContactParams & inputParams, const mc_rbdy
     sustainedContactSet_.push_back(contactName);
   }
 
-  contacts_.insert({contactName, {inputParams, robot}});
+  contacts_.insert({contactName, {inputParams, useSpatialVectorAlgebra, robot}});
 
   //std::cout << "McContactSet: Adding end-effector contact: " << inputParams.surfaceName << std::endl;
 
@@ -472,3 +472,5 @@ void McContactSet::addGuiItems(mc_control::fsm::Controller &ctl) const
 }
 
 } // namespace mc_impact
+
+

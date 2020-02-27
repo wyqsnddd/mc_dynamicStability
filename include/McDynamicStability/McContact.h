@@ -7,6 +7,10 @@
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 
+
+
+
+
 namespace mc_impact
 {
 
@@ -15,6 +19,7 @@ struct McContactParams
  * \brief Parameters of a contact. We use the surface name to denote this contact
  */
 {
+  bool enabled;
   std::string surfaceName; ///< surface name of the contact.
   std::string bodyName; ///< Body name of the link where the contact is defined.
   std::string sensorName; ///< Sensor name of the link.
@@ -25,8 +30,7 @@ struct McContactParams
   double minForce = 15.0; ///< The minimum contact force.
   // double maxPressure = 1000.0; ///< The minimum contact force.
   int index = 0; ///< Index of the contact in the wrenchDistributionQP.
-  bool useSpatialVectorAlgebra = false; ///< Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise
-                                        ///< we represent wrench = [f, \tau].
+  //bool useSpatialVectorAlgebra = false;   
   bool sustainedContact;
 
   
@@ -34,10 +38,14 @@ struct McContactParams
   int surfaceNormalAxis = 2;
 };
 
+
+
+
+
 class McContact
 {
 public:
-  McContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot);
+  McContact(const McContactParams & inputParams, bool useSpatialVectorAlgebra, const mc_rbdyn::Robot & robot);
 
   ~McContact() {}
 
@@ -110,9 +118,14 @@ public:
   {
     return graspMatrix_;
   }
+
+  /*! 
+   * \brief Use the sva-consistent representation: i.e. wrench = [\tau, f], otherwise we represent wrench = [f, \tau].
+   */
+
   inline bool useSVA() const
   {
-    return getContactParams().useSpatialVectorAlgebra;
+    return useSpatialVectorAlgebra_;
   }
 
   inline void breakContact()
@@ -141,9 +154,10 @@ public:
   {
     return robot_;
   }
-
+  
 private:
   McContactParams mcContactParams_;
+  bool useSpatialVectorAlgebra_;
 
   const mc_rbdyn::Robot & robot_;
 
@@ -207,7 +221,7 @@ public:
    */
   const McContact & getContact(const std::string & name) const;
 
-  bool addContact(const McContactParams & inputParams, const mc_rbdyn::Robot & robot);
+  bool addContact(const McContactParams & inputParams, bool useSpatialVectorAlgebra, const mc_rbdyn::Robot & robot);
 
   inline const std::map<std::string, mc_impact::McContact> & getContactMap() const
   {
@@ -234,3 +248,47 @@ private:
 };
 
 } // namespace mc_impact
+
+// Reader of McContactParams
+namespace mc_rtc
+{
+template<>
+struct ConfigurationLoader<mc_impact::McContactParams>
+{
+  static mc_impact::McContactParams load(const mc_rtc::Configuration & contactConfig)
+  {
+    /** Create an mc_impact::McContactParams from what's inside a config */
+    mc_impact::McContactParams contactParams;
+
+    contactParams.enabled = static_cast<bool>(contactConfig("enabled"));
+    contactParams.bodyName = static_cast<std::string>(contactConfig("bodyName"));
+    contactParams.surfaceName = static_cast<std::string>(contactConfig("surfaceName"));
+    contactParams.sensorName = static_cast<std::string>(contactConfig("sensorName"));
+    contactParams.frictionCoe = contactConfig("friction");
+    contactParams.halfX = contactConfig("half-x");
+    contactParams.halfY = contactConfig("half-y");
+
+    //contactParams.useSpatialVectorAlgebra = useSpatialVectorAlgebra;
+    contactParams.sustainedContact = contactConfig("sustainedContact");
+    contactParams.surfaceNormalAxis = contactConfig("surfaceNormalAxis"); 
+    return contactParams;
+  }
+
+  static mc_rtc::Configuration save(const mc_impact::McContactParams & data)
+  {
+    /** Create an mc_rtc::Configuration from the object */
+    mc_rtc::Configuration config;
+    config.add("bodyName", data.bodyName);
+    config.add("surfaceName", data.surfaceName);
+    config.add("sensorName", data.sensorName);
+    config.add("frictionCoe", data.frictionCoe);
+    config.add("halfX", data.halfX);
+    config.add("halfY", data.halfY);
+    config.add("sustainedContact", data.sustainedContact);
+    config.add("surfaceNormalAxis", data.surfaceNormalAxis);
+    return config;
+  }
+};
+} // namespace mc_rtc 
+
+
